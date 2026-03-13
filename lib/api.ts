@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * API Client — SGN (Sistema de Gestão de Notas)
  * IPM Mayombe
@@ -16,7 +18,7 @@ function getToken(): string | null {
 
 /** Fetch genérico com token automático e tratamento de erros */
 export async function apiFetch<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token   = getToken()
+  const token = getToken()
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options?.headers as Record<string, string>),
@@ -25,7 +27,7 @@ export async function apiFetch<T = unknown>(endpoint: string, options?: RequestI
     headers["Authorization"] = `Bearer ${token}`
   }
 
-  const res  = await fetch(`${API_BASE}${endpoint}`, { ...options, headers })
+  const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers })
   const data = await res.json().catch(() => ({ error: "Resposta inválida do servidor" }))
 
   if (res.status === 401) {
@@ -611,208 +613,4 @@ export async function saveCalendarioEvento(data: {
 
 export async function deleteCalendarioEvento(id: number) {
   return apiFetch(`/calendario/save.php?id=${id}`, { method: "DELETE" })
-}
-
-
-// Substituir a interface NotaPayload existente por esta:
-export interface NotaPayload {
-  alunoId: number
-  disciplinaId: number
-  professorId: number
-  trimestreId: number
-  p1: number | null
-  p2: number | null
-  trabalho: number | null
-  exame: number | null
-  feedback?: string | null
-}
-
-// Substituir interface NotaAluno por esta (com campos calculados):
-export interface NotaAluno {
-  id: number
-  disciplina_id: number
-  disciplina_nome: string
-  sigla: string
-  professor_nome: string
-  trimestre_id: number
-  trimestre_nome: string
-  p1: number | null
-  p2: number | null
-  trabalho: number | null
-  exame: number | null
-  // MAC = (p1 + p2 + trabalho) / 3
-  mac?: number | null
-  // Média trimestral = (MAC + exame) / 2
-  media: number | null
-  nota_recuperacao: number | null
-  // Média final: se houver recuperação = (media + nota_recuperacao) / 2
-  media_final?: number | null
-  estado: string
-  situacao?: "Aprovado" | "Reprovado" | "Pendente"
-  observacoes: string | null
-  feedback: string | null
-}
-
-// ─── FUNÇÕES DE CÁLCULO (fórmula MED Angola) ────────────────
-/**
- * Calcula MAC (Média de Avaliação Contínua)
- * MAC = (P1 + P2 + Trabalho) / 3
- */
-export function calcularMAC(p1: number | null, p2: number | null, trabalho: number | null): number | null {
-  if (p1 === null || p2 === null || trabalho === null) return null
-  return Math.round(((p1 + p2 + trabalho) / 3) * 100) / 100
-}
-
-/**
- * Calcula Média Trimestral (fórmula oficial MED Angola)
- * MT = (MAC + PT) / 2
- * onde PT = Prova Trimestral (campo exame)
- */
-export function calcularMediaTrimestral(
-  p1: number | null,
-  p2: number | null,
-  trabalho: number | null,
-  exame: number | null
-): number | null {
-  const mac = calcularMAC(p1, p2, trabalho)
-  if (mac === null) return null
-  if (exame === null) return mac // sem exame, retorna só MAC
-  return Math.round(((mac + exame) / 2) * 100) / 100
-}
-
-/**
- * Calcula Média Anual
- * MA = (MT1 + MT2 + MT3) / 3
- */
-export function calcularMediaAnual(medias: (number | null)[]): number | null {
-  const validas = medias.filter((m): m is number => m !== null)
-  if (validas.length === 0) return null
-  return Math.round((validas.reduce((a, b) => a + b, 0) / validas.length) * 100) / 100
-}
-
-/**
- * Calcula Média Final com recuperação
- * MF = (MA + Exame_Recuperacao) / 2
- */
-export function calcularMediaFinal(mediaAnual: number | null, recuperacao: number | null): number | null {
-  if (mediaAnual === null) return null
-  if (recuperacao === null) return mediaAnual
-  return Math.round(((mediaAnual + recuperacao) / 2) * 100) / 100
-}
-
-/** Determina situação baseada na média (≥10 = Aprovado) */
-export function determinarSituacao(media: number | null): "Aprovado" | "Reprovado" | "Pendente" {
-  if (media === null) return "Pendente"
-  return media >= 10 ? "Aprovado" : "Reprovado"
-}
-
-// ─── RECUPERAÇÃO ─────────────────────────────────────────────
-export interface RecuperacaoAluno {
-  nota_id: number
-  aluno_id: number
-  aluno_numero: string
-  aluno_nome: string
-  disciplina: string
-  trimestre: string
-  p1: number | null
-  p2: number | null
-  trabalho: number | null
-  exame: number | null
-  media: number | null
-  nota_recuperacao: number | null
-  media_final: number | null
-  aprovado: boolean
-}
-
-export async function getRecuperacao(params?: {
-  trimestreId?: number
-  disciplinaId?: number
-  turmaId?: number
-}): Promise<{ success: boolean; data: RecuperacaoAluno[]; reprovados: number }> {
-  const query = new URLSearchParams(params as Record<string, string>).toString()
-  return apiFetch(`/notas/recuperacao.php?${query}`)
-}
-
-export async function lancarRecuperacao(notaId: number, notaRecuperacao: number | null) {
-  return apiFetch("/notas/recuperacao.php", {
-    method: "POST",
-    body: JSON.stringify({ notaId, nota_recuperacao: notaRecuperacao }),
-  })
-}
-
-// ─── NOTIFICAÇÕES ────────────────────────────────────────────
-export interface Notificacao {
-  id: number
-  titulo: string
-  mensagem: string
-  tipo: "info" | "aviso" | "sucesso" | "erro"
-  lida: boolean
-  criado_em: string
-}
-
-export async function getNotificacoes(): Promise<{
-  success: boolean
-  data: Notificacao[]
-  nao_lidas: number
-}> {
-  return apiFetch("/notificacoes/index.php")
-}
-
-export async function marcarNotificacaoLida(id: number | "todos") {
-  return apiFetch("/notificacoes/index.php", {
-    method: "PUT",
-    body: JSON.stringify(id === "todos" ? { todos: true } : { id }),
-  })
-}
-
-// ─── RELATÓRIO DE NOTAS ALARGADO ────────────────────────────
-export interface RelatorioNota {
-  nota_id: number
-  aluno_id: number
-  aluno_numero: string
-  aluno_nome: string
-  turma_nome: string
-  disciplina_id: number
-  disciplina_nome: string
-  disciplina_sigla: string
-  professor_nome: string
-  trimestre_nome: string
-  ano_lectivo: string
-  p1: number | null
-  p2: number | null
-  trabalho: number | null
-  exame: number | null
-  mac: number | null
-  media_trimestral: number | null
-  nota_recuperacao: number | null
-  media_final: number | null
-  situacao: "Aprovado" | "Reprovado" | "Pendente"
-  estado: string
-  feedback: string | null
-}
-
-export async function getRelatorioNotasCompleto(params?: {
-  turmaId?: number
-  disciplinaId?: number
-  trimestreId?: number
-  anoLectivoId?: number
-  estado?: string
-}): Promise<{
-  success: boolean
-  data: RelatorioNota[]
-  stats: {
-    total: number
-    aprovados: number
-    reprovados: number
-    pendentes: number
-    taxa_aprovacao: number
-    media_geral: number | null
-  }
-}> {
-  const query = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(params || {}).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)])
-    )
-  ).toString()
-  return apiFetch(`/notas/relatorio.php?${query}`)
 }
