@@ -1,8 +1,14 @@
-FROM php:8.2-apache
+FROM ubuntu:22.04
 
-RUN docker-php-ext-install mysqli
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN a2enmod rewrite headers
+RUN apt-get update && apt-get install -y \
+    apache2 \
+    php8.1 \
+    php8.1-mysqli \
+    libapache2-mod-php8.1 \
+    && a2enmod rewrite headers \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . /var/www/html/
 
@@ -11,11 +17,8 @@ RUN echo '<Directory /var/www/html>\n\
     Require all granted\n\
 </Directory>' >> /etc/apache2/apache2.conf
 
-RUN echo '#!/bin/bash\n\
-sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf\n\
-sed -i "s/<VirtualHost \*:80>/<VirtualHost *:${PORT:-80}>/g" /etc/apache2/sites-enabled/000-default.conf\n\
-apache2-foreground' > /start.sh && chmod +x /start.sh
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-CMD ["/bin/bash", "/start.sh"]
+CMD ["bash", "-c", "sed -i \"s/Listen 80/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && sed -i \"s/<VirtualHost \\*:80>/<VirtualHost *:${PORT:-80}>/\" /etc/apache2/sites-enabled/000-default.conf && apache2ctl -D FOREGROUND"]
