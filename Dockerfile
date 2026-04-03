@@ -11,10 +11,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN a2enmod rewrite headers
 
-# Apagar a página padrão do Apache
 RUN rm -rf /var/www/html/*
 
-COPY . /var/www/html/
+COPY backend/ /var/www/html/
 
 RUN chown -R www-data:www-data /var/www/html
 
