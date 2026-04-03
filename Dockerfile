@@ -13,7 +13,7 @@ RUN a2enmod rewrite headers
 
 RUN rm -rf /var/www/html/*
 
-COPY backend/ /var/www/html/
+COPY . /var/www/html/
 
 RUN chown -R www-data:www-data /var/www/html
 
