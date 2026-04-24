@@ -28,7 +28,6 @@ const professorLinks = [
   { href: "/dashboard/professor/pautas", label: "Pautas", icon: FileText },
   { href: "/dashboard/professor/frequencias", label: "Frequências", icon: Users },
   { href: "/dashboard/professor/horarios", label: "Horários", icon: Clock },
-  { href: "/dashboard/professor/avaliacoes", label: "Avaliações", icon: Calendar },
 ]
 
 const encarregadoLinks = [
@@ -46,11 +45,9 @@ const adminLinks = [
   { href: "/dashboard/admin/utilizadores", label: "Utilizadores", icon: Users },
   { href: "/dashboard/admin/turmas", label: "Turmas", icon: ClipboardList },
   { href: "/dashboard/admin/disciplinas", label: "Disciplinas", icon: BookOpen },
-  { href: "/dashboard/admin/matriculas", label: "Matrículas", icon: FileText },
+  { href: "/dashboard/admin/cursos-anos", label: "Cursos & Anos Lectivos", icon: Calendar },
   { href: "/dashboard/admin/horarios", label: "Horários", icon: Clock },
-  { href: "/dashboard/admin/calendario", label: "Calendário", icon: Calendar },
   { href: "/dashboard/admin/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/dashboard/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
   { href: "/dashboard/admin/auditoria", label: "Auditoria", icon: ShieldCheck },
 ]
 
@@ -221,7 +218,7 @@ export function DashboardSidebar() {
           >
             {collapsed ? <PanelLeft className="w-3 h-3" /> : <PanelLeftClose className="w-3 h-3" />}
           </Button>
-        </div>    
+        </div>
         <SidebarContent collapsed={collapsed} />
       </aside>
     </>

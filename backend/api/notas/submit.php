@@ -25,12 +25,12 @@ function registarAuditoria($conn, $notaId, $alunoNome, $disciplina, $trimestre, 
 }
 
 try {
-    $stmtCheck = $conn->prepare("SELECT id, estado, p1, p2, trabalho, exame FROM notas WHERE aluno_id = ? AND disciplina_id = ? AND trimestre_id = ?");
+    $stmtCheck = $conn->prepare("SELECT id, estado, p1, trabalho, exame, em_recurso FROM notas WHERE aluno_id = ? AND disciplina_id = ? AND trimestre_id = ?");
     $stmtCheckBloq = $conn->prepare("SELECT bloqueado FROM trimestres WHERE id = ?");
     $stmtMeta = $conn->prepare("SELECT a.nome AS aluno, d.nome AS disciplina, t.nome AS trimestre FROM alunos a, disciplinas d, trimestres t WHERE a.id=? AND d.id=? AND t.id=?");
 
-    $stmtInsert = $conn->prepare("INSERT INTO notas (aluno_id, disciplina_id, professor_id, trimestre_id, p1, p2, trabalho, exame, feedback, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendente')");
-    $stmtUpdate = $conn->prepare("UPDATE notas SET professor_id=?, p1=?, p2=?, trabalho=?, exame=?, feedback=?, estado='Pendente', data_lancamento=CURRENT_TIMESTAMP WHERE id=? AND estado NOT IN ('Aprovado')");
+    $stmtInsert = $conn->prepare("INSERT INTO notas (aluno_id, disciplina_id, professor_id, trimestre_id, p1, trabalho, exame, feedback, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmtUpdate = $conn->prepare("UPDATE notas SET professor_id=?, p1=?, trabalho=?, exame=?, feedback=?, estado=?, data_lancamento=CURRENT_TIMESTAMP WHERE id=? AND (estado <> 'Aprovado' OR em_recurso = 1)");
 
     foreach ($notas as $nota) {
         if (empty($nota['alunoId']) || empty($nota['disciplinaId']) || empty($nota['professorId']) || empty($nota['trimestreId'])) {
@@ -51,11 +51,10 @@ try {
         }
 
         $p1 = ($nota['p1'] ?? null) !== null && ($nota['p1'] ?? '') !== '' ? floatval($nota['p1']) : null;
-        $p2 = ($nota['p2'] ?? null) !== null && ($nota['p2'] ?? '') !== '' ? floatval($nota['p2']) : null;
         $trabalho = ($nota['trabalho'] ?? null) !== null && ($nota['trabalho'] ?? '') !== '' ? floatval($nota['trabalho']) : null;
         $exame = ($nota['exame'] ?? null) !== null && ($nota['exame'] ?? '') !== '' ? floatval($nota['exame']) : null;
 
-        foreach (['p1' => $p1, 'p2' => $p2, 'trabalho' => $trabalho, 'exame' => $exame] as $campo => $val) {
+        foreach (['p1' => $p1, 'trabalho' => $trabalho, 'exame' => $exame] as $campo => $val) {
             if ($val !== null && ($val < 0 || $val > 20)) { $erros[] = "Nota '$campo' fora do intervalo (0-20)"; continue 2; }
         }
 
@@ -69,19 +68,22 @@ try {
         $meta = $stmtMeta->get_result()->fetch_assoc();
         $authUser = $auth['nome'] ?? ('professor#' . $auth['id']);
 
+        // Determinar estado alvo: Rascunho ou Pendente (submissão)
+        $modo   = isset($nota['modo']) && $nota['modo'] === 'rascunho' ? 'Rascunho' : 'Pendente';
+
         if ($existing) {
             // Registar auditoria dos campos que mudaram
-            $campos = ['p1' => $p1, 'p2' => $p2, 'trabalho' => $trabalho, 'exame' => $exame];
+            $campos = ['p1' => $p1, 'trabalho' => $trabalho, 'exame' => $exame];
             foreach ($campos as $c => $novoVal) {
                 $antigo = $existing[$c];
                 if (strval($antigo ?? '') !== strval($novoVal ?? '')) {
                     registarAuditoria($conn, $existing['id'], $meta['aluno'] ?? '', $meta['disciplina'] ?? '', $meta['trimestre'] ?? '', $c, $antigo !== null ? strval($antigo) : '', $novoVal !== null ? strval($novoVal) : '', $authUser, 'professor');
                 }
             }
-            $stmtUpdate->bind_param("iddddsi", $professorId, $p1, $p2, $trabalho, $exame, $feedback, $existing['id']);
+            $stmtUpdate->bind_param("idddssi", $professorId, $p1, $trabalho, $exame, $feedback, $modo, $existing['id']);
             $stmtUpdate->execute();
         } else {
-            $stmtInsert->bind_param("iiiidddds", $alunoId, $disciplinaId, $professorId, $trimestreId, $p1, $p2, $trabalho, $exame, $feedback);
+            $stmtInsert->bind_param("iiiidddss", $alunoId, $disciplinaId, $professorId, $trimestreId, $p1, $trabalho, $exame, $feedback, $modo);
             $stmtInsert->execute();
             $novoId = $conn->insert_id;
             registarAuditoria($conn, $novoId, $meta['aluno'] ?? '', $meta['disciplina'] ?? '', $meta['trimestre'] ?? '', 'criacao', '', 'Pendente', $authUser, 'professor');

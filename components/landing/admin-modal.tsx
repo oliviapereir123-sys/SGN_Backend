@@ -109,7 +109,7 @@ export function AdminModal() {
                   <Input
                     id="admin-email"
                     type="email"
-                    placeholder="admin@ipmayombe.ao"
+                    placeholder="admin@ipMaiombe.ao"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -151,7 +151,7 @@ export function AdminModal() {
 
                 <div className="p-3 bg-muted/50 rounded-lg border border-border">
                   <p className="text-xs font-semibold mb-1">Conta Demo:</p>
-                  <p className="text-xs text-muted-foreground">Email: admin@ipmayombe.ao</p>
+                  <p className="text-xs text-muted-foreground">Email: admin@ipMaiombe.ao</p>
                   <p className="text-xs text-muted-foreground">Senha: admin123</p>
                 </div>
 

@@ -68,8 +68,7 @@ export default function AlunoAvaliacoesPage() {
         if (!user?.id || !trimestreId) return
         setLoadingList(true)
         // Buscar avaliações da turma do aluno para o trimestre seleccionado
-        apiFetch(`/aluno/avaliacoes.php?alunoId=${user.id}&trimestreId=${trimestreId}`)
-            .then((r: any) => r.json())
+        apiFetch<{ success: boolean; data: Avaliacao[] }>(`/aluno/avaliacoes.php?alunoId=${user.id}&trimestreId=${trimestreId}`)
             .then((res) => setAvaliacoes(res.data || []))
             .catch(() => toast({ title: "Erro ao carregar avaliações", variant: "destructive" }))
             .finally(() => setLoadingList(false))

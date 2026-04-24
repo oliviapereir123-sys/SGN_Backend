@@ -19,13 +19,12 @@ import {
 } from "@/components/ui/select"
 import {
   Users, UserPlus, Upload, Pencil, UserX, Search,
-  GraduationCap, BookOpen, Loader2, Download, X, CheckCircle2, AlertCircle,
+  GraduationCap, BookOpen, Loader2, Download, CheckCircle2, AlertCircle, KeyRound,
 } from "lucide-react"
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
-
-type Prof = { id: number; nome: string; email: string; departamento: string; estado: string }
+type Prof  = { id: number; nome: string; email: string; departamento: string; estado: string }
 type Aluno = { id: number; numero: string; nome: string; email: string; estado: string; turma_id: number | null; turma: string; curso: string }
 type Turma = { id: number; nome: string; ano: number; curso: string }
 
@@ -34,22 +33,29 @@ export default function UtilizadoresPage() {
   const { user, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
-  const [tab, setTab] = useState<"professores" | "alunos">("professores")
+  const [tab, setTab]               = useState<"professores" | "alunos">("professores")
   const [professores, setProfessores] = useState<Prof[]>([])
-  const [alunos, setAlunos] = useState<Aluno[]>([])
-  const [turmas, setTurmas] = useState<Turma[]>([])
-  const [search, setSearch] = useState("")
-  const [loading, setLoading] = useState(true)
+  const [alunos, setAlunos]         = useState<Aluno[]>([])
+  const [turmas, setTurmas]         = useState<Turma[]>([])
+  const [search, setSearch]         = useState("")
+  const [loading, setLoading]       = useState(true)
 
-  // Modais
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editItem, setEditItem] = useState<Prof | Aluno | null>(null)
-  const [formData, setFormData] = useState<Record<string, string>>({})
-  const [saving, setSaving] = useState(false)
+  // Modal criar/editar
+  const [modalOpen, setModalOpen]   = useState(false)
+  const [editItem, setEditItem]     = useState<Prof | Aluno | null>(null)
+  const [formData, setFormData]     = useState<Record<string, string>>({})
+  const [saving, setSaving]         = useState(false)
+
+  // Modal alterar senha
+  const [senhaOpen, setSenhaOpen]           = useState(false)
+  const [senhaTarget, setSenhaTarget]       = useState<Prof | Aluno | null>(null)
+  const [novaSenha, setNovaSenha]           = useState("")
+  const [confirmarSenha, setConfirmarSenha] = useState("")
+  const [savingSenha, setSavingSenha]       = useState(false)
 
   // Upload CSV
-  const [uploadOpen, setUploadOpen] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [uploadOpen, setUploadOpen]     = useState(false)
+  const [uploading, setUploading]       = useState(false)
   const [uploadResult, setUploadResult] = useState<{ inseridos: number; erros: string[]; message: string } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -72,11 +78,17 @@ export default function UtilizadoresPage() {
 
   useEffect(() => { if (user?.id) carregar() }, [user?.id])
 
-  const profsFiltrados = professores.filter(p => p.nome.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase()))
+  const profsFiltrados  = professores.filter(p => p.nome.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase()))
   const alunosFiltrados = alunos.filter(a => a.nome.toLowerCase().includes(search.toLowerCase()) || a.numero.includes(search))
 
-  const abrirCriar = () => { setEditItem(null); setFormData({}); setModalOpen(true) }
+  const abrirCriar  = () => { setEditItem(null); setFormData({}); setModalOpen(true) }
   const abrirEditar = (item: Prof | Aluno) => { setEditItem(item); setFormData(item as any); setModalOpen(true) }
+  const abrirSenha  = (item: Prof | Aluno) => {
+    setSenhaTarget(item)
+    setNovaSenha("")
+    setConfirmarSenha("")
+    setSenhaOpen(true)
+  }
 
   const guardar = async () => {
     setSaving(true)
@@ -87,13 +99,41 @@ export default function UtilizadoresPage() {
         body: JSON.stringify(editItem ? { ...formData, id: editItem.id } : formData),
       })
       if (res.success) {
-        toast({ title: editItem ? "Actualizado com sucesso" : `${tab === "professores" ? "Professor" : "Aluno"} criado`, description: res.password_gerada ? `Senha gerada: ${res.password_gerada}` : undefined })
+        toast({
+          title: editItem ? "Actualizado com sucesso" : `${tab === "professores" ? "Professor" : "Aluno"} criado`,
+          description: res.password_gerada ? `Senha gerada: ${res.password_gerada}` : undefined,
+        })
         setModalOpen(false)
         carregar()
       } else {
         toast({ title: "Erro", description: res.error, variant: "destructive" })
       }
     } finally { setSaving(false) }
+  }
+
+  const alterarSenha = async () => {
+    if (!novaSenha) {
+      toast({ title: "Introduza a nova senha", variant: "destructive" }); return
+    }
+    if (novaSenha !== confirmarSenha) {
+      toast({ title: "As senhas não coincidem", variant: "destructive" }); return
+    }
+    if (novaSenha.length < 6) {
+      toast({ title: "A senha deve ter pelo menos 6 caracteres", variant: "destructive" }); return
+    }
+    setSavingSenha(true)
+    try {
+      const res = await apiFetch(`/admin/utilizadores.php?tipo=${tab}`, {
+        method: "PATCH",
+        body: JSON.stringify({ id: senhaTarget!.id, password: novaSenha }),
+      })
+      if (res.success) {
+        toast({ title: "Senha alterada com sucesso" })
+        setSenhaOpen(false)
+      } else {
+        toast({ title: "Erro ao alterar senha", description: res.error, variant: "destructive" })
+      }
+    } finally { setSavingSenha(false) }
   }
 
   const desactivar = async (id: number) => {
@@ -158,7 +198,9 @@ export default function UtilizadoresPage() {
               {(["professores", "alunos"] as const).map(t => (
                 <button key={t} onClick={() => { setTab(t); setSearch("") }}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"}`}>
-                  {t === "professores" ? <><BookOpen className="w-4 h-4 inline mr-1" />Professores ({professores.length})</> : <><GraduationCap className="w-4 h-4 inline mr-1" />Alunos ({alunos.length})</>}
+                  {t === "professores"
+                    ? <><BookOpen className="w-4 h-4 inline mr-1" />Professores ({professores.length})</>
+                    : <><GraduationCap className="w-4 h-4 inline mr-1" />Alunos ({alunos.length})</>}
                 </button>
               ))}
             </div>
@@ -199,8 +241,15 @@ export default function UtilizadoresPage() {
                         </td>
                         <td className="p-4">
                           <div className="flex gap-2 justify-end">
-                            <Button size="sm" variant="ghost" onClick={() => abrirEditar(item)}><Pencil className="w-4 h-4" /></Button>
-                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => desactivar(item.id)}><UserX className="w-4 h-4" /></Button>
+                            <Button size="sm" variant="ghost" title="Editar" onClick={() => abrirEditar(item)}>
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" title="Alterar senha" onClick={() => abrirSenha(item)}>
+                              <KeyRound className="w-4 h-4 text-muted-foreground" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" title="Desactivar" onClick={() => desactivar(item.id)}>
+                              <UserX className="w-4 h-4" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -273,6 +322,55 @@ export default function UtilizadoresPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancelar</Button>
             <Button onClick={guardar} disabled={saving}>{saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}{editItem ? "Guardar" : "Criar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal alterar senha */}
+      <Dialog open={senhaOpen} onOpenChange={v => { setSenhaOpen(v) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-primary" /> Alterar Senha
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1 pb-1">
+            <p className="text-sm text-muted-foreground">
+              A alterar senha de <span className="font-semibold text-foreground">{senhaTarget?.nome}</span>
+            </p>
+          </div>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label>Nova Senha *</Label>
+              <Input
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={novaSenha}
+                onChange={e => setNovaSenha(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label>Confirmar Senha *</Label>
+              <Input
+                type="password"
+                placeholder="Repetir senha"
+                value={confirmarSenha}
+                onChange={e => setConfirmarSenha(e.target.value)}
+              />
+              {confirmarSenha && novaSenha !== confirmarSenha && (
+                <p className="text-xs text-destructive mt-1">As senhas não coincidem</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSenhaOpen(false)}>Cancelar</Button>
+            <Button
+              onClick={alterarSenha}
+              disabled={savingSenha || !novaSenha || novaSenha !== confirmarSenha}
+            >
+              {savingSenha && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Alterar Senha
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

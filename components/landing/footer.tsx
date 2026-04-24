@@ -16,7 +16,7 @@ export function Footer() {
               </div>
               <div>
                 <h3 className="font-bold text-lg">Instituto Politécnico</h3>
-                <p className="text-sm text-background/60">do Mayombe</p>
+                <p className="text-sm text-background/60">Maiombe Nº 3050 IB-SEQUELE </p>
               </div>
             </Link>
             <p className="text-background/70 text-sm leading-relaxed">
@@ -45,7 +45,7 @@ export function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <span className="text-background/70 text-sm">Província do Cabinda, Mayombe, Angola</span>
+                <span className="text-background/70 text-sm">Seguele, Provincia do Icolo E Bengo, Angola</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary flex-shrink-0" />
@@ -53,7 +53,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                <span className="text-background/70 text-sm">info@ipmayombe.ao</span>
+                <span className="text-background/70 text-sm">info@ipMaiombe.ao</span>
               </li>
             </ul>
           </div>
@@ -94,7 +94,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-background/50 text-sm">
-            © 2025 Instituto Politécnico do Mayombe. Todos os direitos reservados.
+            © 2025 Inst. Politécnico do Maiombe IB Sequele Nº 3050. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
             <Link href="#" className="text-background/50 hover:text-background text-sm">

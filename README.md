@@ -1,5 +1,5 @@
 # SGN — Sistema de Gestão de Notas
-### Instituto Politécnico do Mayombe
+### Instituto Politécnico do Maiombe
 
 Sistema focado exclusivamente na gestão de notas académicas, com 4 perfis de utilizadores.
 
@@ -95,8 +95,8 @@ NEXT_PUBLIC_API_URL=http://localhost/sgn/backend/api
 
 | Perfil | Credencial | Senha |
 |--------|-----------|-------|
-| Admin | admin@ipmayombe.ao | admin123 |
-| Professor | maria.santos@ipmayombe.ao | prof123 |
+| Admin | admin@ipMaiombe.ao | admin123 |
+| Professor | maria.santos@ipMaiombe.ao | prof123 |
 | Aluno | Nº 2024001234 | aluno123 |
 | Encarregado | maria.silva@email.ao | enc123 |
 

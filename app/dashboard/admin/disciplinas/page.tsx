@@ -354,6 +354,7 @@ export default function AdminDisciplinasPage() {
                     <SelectItem value="10">10º Ano</SelectItem>
                     <SelectItem value="11">11º Ano</SelectItem>
                     <SelectItem value="12">12º Ano</SelectItem>
+                  <SelectItem value="13">13º Ano</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -376,6 +377,7 @@ export default function AdminDisciplinasPage() {
                   onChange={(e) => setForm((f) => ({ ...f, carga_horaria: e.target.value }))}
                 />
               </div>
+              {/*
               <div className="space-y-1">
                 <Label>Créditos</Label>
                 <Input
@@ -383,7 +385,7 @@ export default function AdminDisciplinasPage() {
                   value={form.creditos}
                   onChange={(e) => setForm((f) => ({ ...f, creditos: e.target.value }))}
                 />
-              </div>
+              </div>*/}
             </div>
           </div>
           <DialogFooter>

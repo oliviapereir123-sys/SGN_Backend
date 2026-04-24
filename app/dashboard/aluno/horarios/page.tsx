@@ -27,7 +27,8 @@ export default function AlunoHorariosPage() {
     sala: string | null
   }>>([])
 
-  const turmaId = user?.type === "aluno" ? (user as { turma_id?: number }).turma_id : null
+  // user.turmaId é o campo correto definido no auth-context (camelCase)
+  const turmaId = user?.type === "aluno" ? user.turmaId : undefined
 
   useEffect(() => {
     if (!isAuthenticated || user?.type !== "aluno") router.push("/login/aluno")

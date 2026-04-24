@@ -46,6 +46,7 @@ if ($type === 'aluno') {
     $result = $conn->query("
         SELECT a.id, a.numero, a.nome, a.email, a.password,
                a.turma_id, a.estado, a.foto,
+               a.telefone, a.data_nascimento,
                t.nome  AS turma,
                t.ano   AS ano,
                c.nome  AS curso,

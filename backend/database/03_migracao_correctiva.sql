@@ -1,6 +1,6 @@
 -- ============================================================
 -- SGN — Migração Correctiva v3
--- Instituto Politécnico do Mayombe
+-- Instituto Politécnico do Maiombe
 -- Corrige inconsistências e adiciona tabelas/campos em falta
 -- Executar APÓS 01_schema.sql e 02_missing_tables.sql
 -- ============================================================

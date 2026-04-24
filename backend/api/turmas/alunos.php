@@ -32,7 +32,8 @@ $stmt = $conn->prepare("
     SELECT a.id, a.numero, a.nome, a.foto,
            n.id       AS nota_id,
            n.p1, n.p2, n.trabalho, n.exame,
-           n.media, n.estado, n.feedback
+           n.media, n.estado, n.feedback,
+           COALESCE(n.em_recurso, 0) AS em_recurso
     FROM alunos a
     LEFT JOIN notas n ON n.aluno_id = a.id
                      AND n.disciplina_id = ?

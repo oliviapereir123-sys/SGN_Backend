@@ -10,9 +10,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getNotasAluno, getTrimestres, type NotaAluno, type Trimestre } from "@/lib/api"
+import { apiFetch, getNotasAluno, getTrimestres, type NotaAluno, type Trimestre } from "@/lib/api"
 import { FileText, Printer, GraduationCap, Award, TrendingUp, Calendar, Loader2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+// ─── Lógica de situação corrigida: Aprovado / Recurso / Reprovado ─────────────
+function getSituacao(media: number | null): { label: string; className: string } {
+  if (media === null) return { label: "Pendente",  className: "bg-muted text-muted-foreground border-0" }
+  if (media >= 10)    return { label: "Aprovado",  className: "bg-green-100 text-green-700 border-0 dark:bg-green-500/20 dark:text-green-400" }
+  if (media >= 7)     return { label: "Recurso",   className: "bg-yellow-100 text-yellow-700 border-0 dark:bg-yellow-500/20 dark:text-yellow-400" }
+  return               { label: "Reprovado", className: "bg-red-100 text-red-700 border-0 dark:bg-red-500/20 dark:text-red-400" }
+}
+
+interface AnoLectivo { id: number; nome: string }
 
 export default function AlunoBoletimPage() {
   const router = useRouter()
@@ -24,26 +34,35 @@ export default function AlunoBoletimPage() {
   const [trimestres, setTrimestres] = useState<Trimestre[]>([])
   const [selectedTrId, setSelectedTrId] = useState<string>("")
   const [selectedTrimestre, setSelectedTrimestre] = useState<Trimestre | null>(null)
+  // ─── Ano lectivo da BD (não hardcoded) ───────────────────────────────────────
+  const [anoLectivo, setAnoLectivo] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated || user?.type !== "aluno") {
-      router.push("/login/aluno")
-    }
+    if (!isAuthenticated || user?.type !== "aluno") router.push("/login/aluno")
   }, [isAuthenticated, user, router])
 
-  // Carregar trimestres e pré-seleccionar o mais recente com notas
+  // Carregar trimestres + ano lectivo activo
   useEffect(() => {
     if (!user?.id) return
-    getTrimestres().then((res) => {
-      const lista = res.data || []
+    Promise.all([
+      getTrimestres(),
+      apiFetch<{ success: boolean; nome?: string; data?: AnoLectivo[] }>("/anos-lectivos/activo.php").catch(() => null),
+    ]).then(([trRes, anoRes]) => {
+      const lista = trRes.data || []
       setTrimestres(lista)
       // pré-seleccionar primeiro encerrado ou activo
-      const primeiro = lista.find((t) => t.estado === "Encerrado") || lista[0]
+
+      const primeiro = lista.find((t) => t.estado === "Encerrado") 
+              || lista.find((t) => t.estado === "Activo") 
+              || lista[0]
       if (primeiro) {
         setSelectedTrId(String(primeiro.id))
         setSelectedTrimestre(primeiro)
       }
+      // Ano lectivo vindo da API
+      if (anoRes?.nome) setAnoLectivo(anoRes.nome)
+      else if (Array.isArray(anoRes?.data) && anoRes?.data?.[0]?.nome) setAnoLectivo(anoRes!.data![0].nome)
     })
   }, [user?.id])
 
@@ -67,9 +86,12 @@ export default function AlunoBoletimPage() {
   const mediaGeral =
     notas.length > 0
       ? notas.filter((n) => n.media !== null).reduce((s, n) => s + Number(n.media), 0) /
-      (notas.filter((n) => n.media !== null).length || 1)
+        (notas.filter((n) => n.media !== null).length || 1)
       : 0
-  const aprovadas = notas.filter((n) => n.media !== null && Number(n.media) >= 10).length
+  const aprovadas  = notas.filter((n) => n.media !== null && Number(n.media) >= 10).length
+  const recurso    = notas.filter((n) => n.media !== null && Number(n.media) >= 7 && Number(n.media) < 10).length
+
+  const situacaoGeral = getSituacao(notas.length > 0 ? mediaGeral : null)
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +115,7 @@ export default function AlunoBoletimPage() {
                     <SelectValue placeholder="Seleccionar período" />
                   </SelectTrigger>
                   <SelectContent>
-                    {trimestres.filter((t) => t.estado !== "Pendente").map((t) => (
+                    {trimestres.map((t) => (
                       <SelectItem key={t.id} value={String(t.id)}>{t.nome}</SelectItem>
                     ))}
                   </SelectContent>
@@ -120,23 +142,23 @@ export default function AlunoBoletimPage() {
                 </Card>
                 <Card>
                   <CardContent className="p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                      <Award className="w-5 h-5 text-success" />
+                    <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                      <Award className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-success">{aprovadas}</p>
+                      <p className="text-2xl font-bold text-green-600">{aprovadas}</p>
                       <p className="text-xs text-muted-foreground">Aprovadas</p>
                     </div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                      <GraduationCap className="w-5 h-5 text-accent" />
+                    <div className="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                      <GraduationCap className="w-5 h-5 text-yellow-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{notas.length}</p>
-                      <p className="text-xs text-muted-foreground">Total Disciplinas</p>
+                      <p className="text-2xl font-bold text-yellow-600">{recurso}</p>
+                      <p className="text-xs text-muted-foreground">Em Recurso</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -163,7 +185,9 @@ export default function AlunoBoletimPage() {
                 <CardContent className="text-center">
                   <AlertCircle className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
                   <h3 className="text-lg font-medium mb-2">Sem notas aprovadas</h3>
-                  <p className="text-muted-foreground">Ainda não existem notas aprovadas para este período.</p>
+                  <p className="text-muted-foreground">
+                    Ainda não existem notas aprovadas para este período. As notas ficam visíveis após validação pelo administrador.
+                  </p>
                 </CardContent>
               </Card>
             ) : (
@@ -175,11 +199,14 @@ export default function AlunoBoletimPage() {
                         <GraduationCap className="w-8 h-8 text-white" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-bold">Instituto Politécnico do Mayombe</h2>
+                        <h2 className="text-xl font-bold">Inst. Politécnico do Maiombe IB Sequele Nº 3050</h2>
                         <p className="text-sm text-muted-foreground">Boletim de Avaliação — {selectedTrimestre?.nome}</p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-lg px-4 py-2">Ano Lectivo 2024/2025</Badge>
+                    {/* Ano lectivo vindo da base de dados */}
+                    <Badge variant="outline" className="text-lg px-4 py-2">
+                      {anoLectivo ? `Ano Lectivo ${anoLectivo}` : "Ano Lectivo"}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -191,23 +218,23 @@ export default function AlunoBoletimPage() {
                     <div><p className="text-xs text-muted-foreground">Turma / Ano</p><p className="font-semibold">{user.turma || "—"}</p></div>
                   </div>
 
-                  {/* Tabela */}
+                  {/* Tabela — colunas: MAC / PP / PT / Média Final */}
                   <div className="rounded-xl border border-border overflow-hidden">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-muted/50">
                           <th className="text-left py-4 px-4 font-semibold">Disciplina</th>
-                          <th className="text-center py-4 px-2 font-semibold">P1</th>
-                          <th className="text-center py-4 px-2 font-semibold">P2</th>
-                          <th className="text-center py-4 px-2 font-semibold">Trab.</th>
-                          <th className="text-center py-4 px-2 font-semibold">Exame</th>
+                          <th className="text-center py-4 px-2 font-semibold text-xs">MAC<br/><span className="font-normal text-muted-foreground">(30%)</span></th>
+                          <th className="text-center py-4 px-2 font-semibold text-xs">PP<br/><span className="font-normal text-muted-foreground">(30%)</span></th>
+                          <th className="text-center py-4 px-2 font-semibold text-xs">PT<br/><span className="font-normal text-muted-foreground">(40%)</span></th>
+                          <th className="text-center py-4 px-2 font-semibold text-xs">Recuperação</th>
                           <th className="text-center py-4 px-4 font-semibold">Média</th>
                           <th className="text-center py-4 px-4 font-semibold">Estado</th>
                         </tr>
                       </thead>
                       <tbody>
                         {notas.map((nota, index) => {
-                          const aprovado = nota.media !== null && Number(nota.media) >= 10
+                          const sit = getSituacao(nota.media !== null ? Number(nota.media) : null)
                           return (
                             <motion.tr
                               key={nota.id}
@@ -220,19 +247,28 @@ export default function AlunoBoletimPage() {
                                 <p className="font-medium">{nota.disciplina_nome}</p>
                                 <p className="text-xs text-muted-foreground">{nota.professor_nome}</p>
                               </td>
-                              <td className="text-center py-4 px-2 font-medium">{nota.p1 ?? "—"}</td>
-                              <td className="text-center py-4 px-2 font-medium">{nota.p2 ?? "—"}</td>
+                              {/* MAC = trabalho, PP = p1, PT = exame */}
                               <td className="text-center py-4 px-2 font-medium">{nota.trabalho ?? "—"}</td>
+                              <td className="text-center py-4 px-2 font-medium">{nota.p1 ?? "—"}</td>
                               <td className="text-center py-4 px-2 font-medium">{nota.exame ?? "—"}</td>
+                              <td className="text-center py-4 px-2 font-medium">
+                                {nota.nota_recuperacao !== null
+                                  ? <span className="text-yellow-600 font-medium">{Number(nota.nota_recuperacao).toFixed(1)}</span>
+                                  : "—"}
+                              </td>
                               <td className="text-center py-4 px-4">
-                                <span className={`text-lg font-bold ${nota.media !== null ? (aprovado ? "text-success" : "text-destructive") : "text-muted-foreground"}`}>
+                                <span className={`text-lg font-bold ${
+                                  nota.media !== null
+                                    ? Number(nota.media) >= 10 ? "text-green-600"
+                                      : Number(nota.media) >= 7  ? "text-yellow-600"
+                                      : "text-red-500"
+                                    : "text-muted-foreground"
+                                }`}>
                                   {nota.media !== null ? Number(nota.media).toFixed(1) : "—"}
                                 </span>
                               </td>
                               <td className="text-center py-4 px-4">
-                                <Badge className={aprovado ? "bg-success/20 text-success border-0" : "bg-destructive/20 text-destructive border-0"}>
-                                  {aprovado ? "Aprovado" : "Reprovado"}
-                                </Badge>
+                                <Badge className={sit.className}>{sit.label}</Badge>
                               </td>
                             </motion.tr>
                           )
@@ -240,16 +276,18 @@ export default function AlunoBoletimPage() {
                       </tbody>
                       <tfoot>
                         <tr className="bg-primary/5 border-t-2 border-primary">
-                          <td colSpan={4} className="py-4 px-4 font-bold text-right">Média Geral do Período:</td>
+                          <td colSpan={5} className="py-4 px-4 font-bold text-right">Média Geral do Período:</td>
                           <td className="text-center py-4 px-4">
-                            <span className={`text-xl font-bold ${mediaGeral >= 10 ? "text-success" : "text-destructive"}`}>
+                            <span className={`text-xl font-bold ${
+                              mediaGeral >= 10 ? "text-green-600"
+                              : mediaGeral >= 7  ? "text-yellow-600"
+                              : "text-red-500"
+                            }`}>
                               {mediaGeral.toFixed(2)}
                             </span>
                           </td>
                           <td className="text-center py-4 px-4">
-                            <Badge className={mediaGeral >= 10 ? "bg-success/20 text-success border-0" : "bg-destructive/20 text-destructive border-0"}>
-                              {mediaGeral >= 10 ? "Aprovado" : "Reprovado"}
-                            </Badge>
+                            <Badge className={situacaoGeral.className}>{situacaoGeral.label}</Badge>
                           </td>
                         </tr>
                       </tfoot>

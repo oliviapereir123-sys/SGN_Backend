@@ -57,25 +57,24 @@ if ($method === 'POST') {
             http_response_code(409); echo json_encode(['error' => 'Email já existe']);
         }
     } elseif ($tipo === 'alunos') {
-        $nome     = trim($data['nome']     ?? '');
-        $email    = trim($data['email']    ?? '');
-        $numero   = trim($data['numero']   ?? '');
-        $turmaId  = intval($data['turma_id'] ?? 0);
-        $pass     = $data['password'] ?? 'Aluno@' . rand(1000,9999);
+        $nome    = trim($data['nome']     ?? '');
+        $email   = trim($data['email']    ?? '');
+        $numero  = trim($data['numero']   ?? '');
+        $turmaId = intval($data['turma_id'] ?? 0);
+        $pass    = $data['password'] ?? 'Aluno@' . rand(1000,9999);
         if (!$nome || !$email || !$numero) { http_response_code(400); echo json_encode(['error' => 'nome, email e numero obrigatórios']); exit(); }
         $hash = password_hash($pass, PASSWORD_BCRYPT);
         $stmt = $conn->prepare("INSERT INTO alunos (numero, nome, email, password, turma_id) VALUES (?,?,?,?,?)");
         $stmt->bind_param("ssssi", $numero, $nome, $email, $hash, $turmaId);
         if ($stmt->execute()) {
             $alunoId = $conn->insert_id;
-            // Criar encarregado se fornecido
             if (!empty($data['enc_nome']) && !empty($data['enc_email'])) {
-                $encNome  = $data['enc_nome'];
-                $encEmail = $data['enc_email'];
+                $encNome   = $data['enc_nome'];
+                $encEmail  = $data['enc_email'];
                 $encParent = $data['enc_parentesco'] ?? 'Encarregado';
-                $encPass  = 'Enc@' . rand(1000,9999);
-                $encHash  = password_hash($encPass, PASSWORD_BCRYPT);
-                $stmtEnc = $conn->prepare("INSERT INTO encarregados (nome, email, password, aluno_id, parentesco) VALUES (?,?,?,?,?)");
+                $encPass   = 'Enc@' . rand(1000,9999);
+                $encHash   = password_hash($encPass, PASSWORD_BCRYPT);
+                $stmtEnc   = $conn->prepare("INSERT INTO encarregados (nome, email, password, aluno_id, parentesco) VALUES (?,?,?,?,?)");
                 $stmtEnc->bind_param("ssssi", $encNome, $encEmail, $encHash, $alunoId, $encParent);
                 $stmtEnc->execute();
             }
@@ -87,27 +86,62 @@ if ($method === 'POST') {
     exit();
 }
 
+// ─── PATCH: alterar senha ────────────────────────────────────
+if ($method === 'PATCH') {
+    $id       = intval($data['id']       ?? 0);
+    $password = trim($data['password']   ?? '');
+
+    if (!$id || !$password) {
+        http_response_code(400);
+        echo json_encode(['error' => 'id e password são obrigatórios']);
+        exit();
+    }
+    if (strlen($password) < 6) {
+        http_response_code(400);
+        echo json_encode(['error' => 'A senha deve ter pelo menos 6 caracteres']);
+        exit();
+    }
+
+    $hash = password_hash($password, PASSWORD_BCRYPT);
+
+    if ($tipo === 'professores') {
+        $stmt = $conn->prepare("UPDATE professores SET password = ? WHERE id = ?");
+        $stmt->bind_param("si", $hash, $id);
+    } elseif ($tipo === 'alunos') {
+        $stmt = $conn->prepare("UPDATE alunos SET password = ? WHERE id = ?");
+        $stmt->bind_param("si", $hash, $id);
+    } else {
+        http_response_code(400);
+        echo json_encode(['error' => 'tipo inválido']);
+        exit();
+    }
+
+    $stmt->execute();
+    echo json_encode(['success' => true]);
+    exit();
+}
+
 // ─── PUT: editar ─────────────────────────────────────────────
 if ($method === 'PUT') {
     $id = intval($data['id'] ?? 0);
     if (!$id) { http_response_code(400); echo json_encode(['error' => 'id obrigatório']); exit(); }
 
     if ($tipo === 'professores') {
-        $nome  = trim($data['nome']  ?? '');
-        $email = trim($data['email'] ?? '');
-        $dept  = trim($data['departamento'] ?? '');
+        $nome   = trim($data['nome']  ?? '');
+        $email  = trim($data['email'] ?? '');
+        $dept   = trim($data['departamento'] ?? '');
         $estado = $data['estado'] ?? 'Activo';
-        $stmt = $conn->prepare("UPDATE professores SET nome=?, email=?, departamento=?, estado=? WHERE id=?");
+        $stmt   = $conn->prepare("UPDATE professores SET nome=?, email=?, departamento=?, estado=? WHERE id=?");
         $stmt->bind_param("ssssi", $nome, $email, $dept, $estado, $id);
         $stmt->execute();
         echo json_encode(['success' => true]);
     } elseif ($tipo === 'alunos') {
-        $nome    = trim($data['nome']    ?? '');
-        $email   = trim($data['email']   ?? '');
-        $numero  = trim($data['numero']  ?? '');
+        $nome    = trim($data['nome']   ?? '');
+        $email   = trim($data['email']  ?? '');
+        $numero  = trim($data['numero'] ?? '');
         $turmaId = intval($data['turma_id'] ?? 0);
         $estado  = $data['estado'] ?? 'Activo';
-        $stmt = $conn->prepare("UPDATE alunos SET nome=?, email=?, numero=?, turma_id=?, estado=? WHERE id=?");
+        $stmt    = $conn->prepare("UPDATE alunos SET nome=?, email=?, numero=?, turma_id=?, estado=? WHERE id=?");
         $stmt->bind_param("sssisi", $nome, $email, $numero, $turmaId, $estado, $id);
         $stmt->execute();
         echo json_encode(['success' => true]);
@@ -115,7 +149,7 @@ if ($method === 'PUT') {
     exit();
 }
 
-// ─── DELETE: desactivar ─────────────────────────────────────
+// ─── DELETE: desactivar ──────────────────────────────────────
 if ($method === 'DELETE') {
     $id = intval($_GET['id'] ?? 0);
     if (!$id) { http_response_code(400); echo json_encode(['error' => 'id obrigatório']); exit(); }

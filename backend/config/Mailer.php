@@ -1,7 +1,7 @@
 <?php
 /**
  * Mailer.php — Envio de email via SMTP com PHPMailer
- * Instituto Politécnico do Mayombe
+ * Instituto Politécnico do Maiombe
  *
  * Dependência: composer require phpmailer/phpmailer
  * Depois de instalar: o ficheiro vendor/autoload.php fica disponível

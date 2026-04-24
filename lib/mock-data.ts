@@ -17,7 +17,7 @@ export const DEMO_ACCOUNTS = {
     numeroAluno: "2024001234",
     password: "aluno123",
     nome: "João Manuel da Silva",
-    email: "joao.silva@aluno.ipmayombe.ao",
+    email: "joao.silva@aluno.ipMaiombe.ao",
     curso: "Informática de Gestão",
     cursoId: "CUR002",
     turma: "IG-3A",
@@ -39,7 +39,7 @@ export const DEMO_ACCOUNTS = {
   },
   professor: {
     id: "PROF001",
-    email: "maria.santos@ipmayombe.ao",
+    email: "maria.santos@ipMaiombe.ao",
     password: "prof123",
     nome: "Profª. Maria dos Santos",
     departamento: "Ciências e Tecnologia",
@@ -57,7 +57,7 @@ export const DEMO_ACCOUNTS = {
   },
   admin: {
     id: "ADM001",
-    email: "admin@ipmayombe.ao",
+    email: "admin@ipMaiombe.ao",
     password: "admin123",
     nome: "António Ferreira",
     cargo: "Administrador do Sistema",
@@ -396,12 +396,12 @@ export const TURMA_ALUNOS = [
 // Estatísticas gerais do admin
 export const CONFIGURACOES = {
   escola: {
-    nome: "Instituto Politécnico do Mayombe",
+    nome: "Instituto Politécnico do Maiombe  Nº 3050 IB - SEQUELE",
     sigla: "IPM",
-    endereco: "Buco Zau, Cabinda, Angola",
+    endereco: "Icolo e Bengo, sequele",
     telefone: "+244 222 123 456",
-    email: "geral@ipmayombe.ao",
-    website: "www.ipmayombe.ao",
+    email: "geral@ipMaiombe.ao",
+    website: "www.ipMaiombe.ao",
     logo: "/placeholder.svg?height=100&width=100",
   },
   academico: {

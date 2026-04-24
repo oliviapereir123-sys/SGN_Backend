@@ -105,8 +105,8 @@ if ($method === 'POST') {
     $nome      = trim($data['nome']       ?? '');
     $cursoId   = intval($data['curso_id'] ?? 0);
     $ano       = intval($data['ano']      ?? 0);
-    $turno     = trim($data['turno']      ?? 'Matutino');
-    $periodo   = trim($data['periodo']    ?? 'Matutino');
+    $turno     = trim($data['turno']      ?? 'Manhã');
+    $periodo   = trim($data['periodo']    ?? $turno);
     $sala      = trim($data['sala']       ?? '') ?: null;
     $capacidade = intval($data['capacidade'] ?? 30);
 
@@ -117,9 +117,9 @@ if ($method === 'POST') {
     }
 
     $stmt = $conn->prepare(
-        'INSERT INTO turmas (nome, curso_id, ano, turno, periodo, sala, capacidade) VALUES (?,?,?,?,?,?,?)'
+        'INSERT INTO turmas (nome, curso_id, ano, turno, sala, capacidade) VALUES (?,?,?,?,?,?)'
     );
-    $stmt->bind_param('siisssi', $nome, $cursoId, $ano, $turno, $periodo, $sala, $capacidade);
+    $stmt->bind_param('siissi', $nome, $cursoId, $ano, $turno, $sala, $capacidade);
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'id' => $conn->insert_id]);
@@ -144,8 +144,8 @@ if ($method === 'PUT') {
     $nome      = trim($data['nome']       ?? '');
     $cursoId   = intval($data['curso_id'] ?? 0);
     $ano       = intval($data['ano']      ?? 0);
-    $turno     = trim($data['turno']      ?? 'Matutino');
-    $periodo   = trim($data['periodo']    ?? 'Matutino');
+    $turno     = trim($data['turno']      ?? 'Manhã');
+    $periodo   = trim($data['periodo']    ?? $turno);
     $sala      = trim($data['sala']       ?? '') ?: null;
     $capacidade = intval($data['capacidade'] ?? 30);
     $estado    = $data['estado'] ?? 'Activa';

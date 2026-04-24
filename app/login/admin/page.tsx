@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
               </div>
               <div>
                 <h2 className="text-xl font-bold">Instituto Politécnico</h2>
-                <p className="text-white/70">do Mayombe</p>
+                <p className="text-white/70">Maiombe do Maiombe</p>
               </div>
             </div>
             <h1 className="text-4xl font-bold mb-4">Portal do Administrador</h1>
@@ -126,7 +126,7 @@ export default function AdminLoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@ipmayombe.ao"
+                    placeholder="admin@ipMaiombe.ao"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required

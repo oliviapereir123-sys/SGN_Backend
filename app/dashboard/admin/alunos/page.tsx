@@ -1,57 +1,73 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { DashboardHeader } from "@/components/dashboard/header"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select"
-import { apiFetch } from "@/lib/api"
+  getAdminAlunos,
+  getAdminTurmas,
+  createAluno,
+  updateAluno,
+  getHistoricoAluno,
+  type AlunoAdmin,
+  type TurmaAdmin,
+  type HistoricoAno,
+} from "@/lib/api"
 import {
   Search, Download, Plus, Edit2, Clock, Users,
-  UserPlus, ArrowUpDown, ChevronLeft, ChevronRight, Loader2
+  UserPlus, ArrowUpDown, ChevronLeft, ChevronRight, Loader2, GraduationCap,
 } from "lucide-react"
-import Link from "next/link"
-
-interface Aluno {
-  id: number
-  numero: string
-  nome: string
-  email: string
-  turma_id: number | null
-  turma_nome: string | null
-  estado: "Activo" | "Inactivo" | "Suspenso"
-  foto: string | null
-  criado_em: string
-}
-
-interface AlunoStats {
-  total: number
-  novos_mes: number
-  taxa_frequencia: number
-}
+import { useToast } from "@/hooks/use-toast"
 
 const PAGE_SIZE = 6
 
 export default function AdminAlunosPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
-  const [alunos, setAlunos] = useState<Aluno[]>([])
+  const { toast } = useToast()
+
+  const [alunos, setAlunos] = useState<AlunoAdmin[]>([])
+  const [total, setTotal] = useState(0)
+  const [paginas, setPaginas] = useState(1)
+  const [turmas, setTurmas] = useState<TurmaAdmin[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [turmaFilter, setTurmaFilter] = useState("todas")
   const [statusFilter, setStatusFilter] = useState("todos")
   const [page, setPage] = useState(1)
 
-  const stats: AlunoStats = {
-    total: alunos.length,
+  const [openForm, setOpenForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editAluno, setEditAluno] = useState<AlunoAdmin | null>(null)
+  const [form, setForm] = useState({
+    nome: "",
+    email: "",
+    numero: "",
+    turma_id: "",
+    estado: "Activo",
+    telefone: "",
+    data_nascimento: "",
+    enc_nome: "",
+    enc_email: "",
+  })
+
+  const [openHistorico, setOpenHistorico] = useState(false)
+  const [historicoAluno, setHistoricoAluno] = useState<{ id: number; nome: string; numero: string } | null>(null)
+  const [historico, setHistorico] = useState<HistoricoAno[]>([])
+  const [historicoLoading, setHistoricoLoading] = useState(false)
+
+  const stats = {
+    total,
     novos_mes: 12,
     taxa_frequencia: 94.2,
   }
@@ -60,39 +76,40 @@ export default function AdminAlunosPage() {
     if (!isAuthenticated || user?.type !== "admin") router.push("/")
   }, [isAuthenticated, user, router])
 
-  useEffect(() => {
+  const carregarAlunos = useCallback(async () => {
     setLoading(true)
-    apiFetch<{ success: boolean; data: Aluno[] }>("/admin/alunos.php")
-      .then((res) => setAlunos(res.data || []))
-      .catch(() => {
-        // Dados de demonstração caso o endpoint ainda não exista
-        setAlunos([
-          { id: 1, numero: "#101", nome: "João Manuel da Silva", email: "joao.silva@aluno.ipmayombe.ao", turma_id: 1, turma_nome: "CONT-10A", estado: "Activo", foto: null, criado_em: "" },
-          { id: 2, numero: "#102", nome: "Ana Beatriz Ferreira", email: "ana.ferreira@aluno.ipmayombe.ao", turma_id: 1, turma_nome: "CONT-10A", estado: "Activo", foto: null, criado_em: "" },
-          { id: 3, numero: "#103", nome: "Pedro Miguel Santos", email: "pedro.santos@aluno.ipmayombe.ao", turma_id: 2, turma_nome: "CONT-10B", estado: "Inactivo", foto: null, criado_em: "" },
-          { id: 4, numero: "#104", nome: "Maria José Costa", email: "maria.costa@aluno.ipmayombe.ao", turma_id: 3, turma_nome: "CONT-11A", estado: "Activo", foto: null, criado_em: "" },
-          { id: 5, numero: "#105", nome: "Carlos Eduardo Gomes", email: "carlos.gomes@aluno.ipmayombe.ao", turma_id: 3, turma_nome: "CONT-11A", estado: "Activo", foto: null, criado_em: "" },
-          { id: 6, numero: "#106", nome: "Luísa Helena Martins", email: "luisa.martins@aluno.ipmayombe.ao", turma_id: 4, turma_nome: "CONT-11B", estado: "Suspenso", foto: null, criado_em: "" },
-          { id: 7, numero: "#107", nome: "Ricardo António Sousa", email: "ricardo.sousa@aluno.ipmayombe.ao", turma_id: 5, turma_nome: "CONT-12A", estado: "Activo", foto: null, criado_em: "" },
-          { id: 8, numero: "#108", nome: "Sofia Margarida Alves", email: "sofia.alves@aluno.ipmayombe.ao", turma_id: 6, turma_nome: "IG-10A", estado: "Activo", foto: null, criado_em: "" },
-        ])
+    try {
+      const res = await getAdminAlunos({
+        search: search || undefined,
+        turmaId: turmaFilter !== "todas" ? Number(turmaFilter) : undefined,
+        estado: statusFilter !== "todos" ? statusFilter : undefined,
+        pagina: page,
+        limite: PAGE_SIZE,
       })
-      .finally(() => setLoading(false))
+      setAlunos(res.data || [])
+      setTotal(res.total || 0)
+      setPaginas(res.paginas || 1)
+    } catch {
+      toast({ title: "Erro ao carregar alunos", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }, [search, turmaFilter, statusFilter, page, toast])
+
+  useEffect(() => {
+    getAdminTurmas()
+      .then((res) => setTurmas(res.data || []))
+      .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.type !== "admin") return
+    carregarAlunos()
+  }, [isAuthenticated, user, carregarAlunos])
 
   if (!isAuthenticated || user?.type !== "admin") return null
 
-  const turmasUnicas = Array.from(new Set(alunos.map((a) => a.turma_nome).filter(Boolean)))
-
-  const filtrados = alunos.filter((a) => {
-    const matchSearch = a.nome.toLowerCase().includes(search.toLowerCase()) || a.email.toLowerCase().includes(search.toLowerCase())
-    const matchTurma = turmaFilter === "todas" || a.turma_nome === turmaFilter
-    const matchStatus = statusFilter === "todos" || a.estado === statusFilter
-    return matchSearch && matchTurma && matchStatus
-  })
-
-  const totalPages = Math.ceil(filtrados.length / PAGE_SIZE)
-  const paginados = filtrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const paginados = alunos
 
   const statusConfig = {
     Activo: { label: "Ativo", className: "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/20 dark:text-green-400" },
@@ -143,8 +160,8 @@ export default function AdminAlunosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="todas">Todas as Turmas</SelectItem>
-                      {turmasUnicas.map((t) => (
-                        <SelectItem key={t!} value={t!}>{t}</SelectItem>
+                      {turmas.map((t) => (
+                        <SelectItem key={t.id} value={String(t.id)}>{t.nome}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -219,10 +236,9 @@ export default function AdminAlunosPage() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-1.5">
-                                <span className={`w-2 h-2 rounded-full ${
-                                  aluno.estado === "Activo" ? "bg-green-500" :
-                                  aluno.estado === "Suspenso" ? "bg-yellow-500" : "bg-gray-400"
-                                }`} />
+                                <span className={`w-2 h-2 rounded-full ${aluno.estado === "Activo" ? "bg-green-500" :
+                                    aluno.estado === "Suspenso" ? "bg-yellow-500" : "bg-gray-400"
+                                  }`} />
                                 <Badge variant="outline" className={statusConfig[aluno.estado].className}>
                                   {statusConfig[aluno.estado].label}
                                 </Badge>
@@ -253,16 +269,17 @@ export default function AdminAlunosPage() {
                 )}
 
                 {/* Paginação */}
-                {!loading && filtrados.length > 0 && (
+                {!loading && total > 0 && (
                   <div className="flex items-center justify-between px-6 py-3 border-t border-border">
                     <p className="text-sm text-muted-foreground">
-                      Mostrando {(page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, filtrados.length)} de {filtrados.length} alunos
+                      Mostrando {Math.min((page - 1) * PAGE_SIZE + 1, total)}-
+                      {Math.min(page * PAGE_SIZE, total)} de {total} alunos
                     </p>
                     <div className="flex items-center gap-1">
                       <Button variant="outline" size="icon" className="w-8 h-8" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
-                      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((p) => (
+                      {Array.from({ length: Math.min(paginas, 5) }, (_, i) => i + 1).map((p) => (
                         <Button
                           key={p}
                           variant={page === p ? "default" : "outline"}
@@ -273,7 +290,7 @@ export default function AdminAlunosPage() {
                           {p}
                         </Button>
                       ))}
-                      <Button variant="outline" size="icon" className="w-8 h-8" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                      <Button variant="outline" size="icon" className="w-8 h-8" disabled={page === paginas} onClick={() => setPage(p => p + 1)}>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>

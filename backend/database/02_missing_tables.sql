@@ -103,3 +103,7 @@ CREATE TABLE IF NOT EXISTS calendario_academico (
 -- Média final com recuperação: MF = (media + nota_recuperacao) / 2
 ALTER TABLE notas
 ADD COLUMN nota_recuperacao DECIMAL(4,2) NULL COMMENT 'Nota do exame de recuperação; quando preenchida, media_final = (media + nota_recuperacao)/2';
+
+-- ─── Flag de recurso: permite edição pelo professor após aprovação ─────────
+ALTER TABLE notas
+ADD COLUMN em_recurso TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = aluno em período de recurso; professor pode continuar a editar até media_final >= 10';

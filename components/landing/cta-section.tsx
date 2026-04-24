@@ -26,10 +26,10 @@ export function CTASection() {
               Matrículas abertas 2024/2025
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
-              Começa o teu futuro<br />no IPM Mayombe
+              Começa o teu futuro<br />no IPM Maiombe
             </h2>
             <p className="text-white/80 text-lg max-w-2xl mx-auto mb-10">
-              Junta-te a mais de 850 alunos que escolheram o Instituto Politécnico do Mayombe
+              Junta-te a mais de 850 alunos que escolheram o Instituto Politécnico  Maiombe  Nº 3050 IB - SEQUELE
               para construir uma carreira sólida e bem-sucedida.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

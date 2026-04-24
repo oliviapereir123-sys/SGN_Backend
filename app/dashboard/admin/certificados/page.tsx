@@ -74,7 +74,7 @@ function gerarHTMLDoc(dados: DocData, tipo: string): string {
   .assinatura-linha{border-top:1px solid #374151;margin-bottom:4px;}
   @media print{body{margin:20px;}}
 </style></head><body>
-<h1>${dados.escola.nome_escola || "Instituto Politécnico do Mayombe"}</h1>
+<h1>${dados.escola.nome_escola || "Instituto Politécnico do Maiombe  Nº 3050 IB - SEQUELE"}</h1>
 <h2>${titulo}</h2>
 <div class="info">
   <div class="info-item"><label>Aluno</label><span>${dados.aluno.nome}</span></div>

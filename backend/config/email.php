@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuração SMTP — SGN IPM Mayombe
+ * Configuração SMTP — SGN IPM Maiombe
  *
  * Para Gmail:
  *  1. Activar verificação em 2 passos na conta Google
@@ -25,7 +25,7 @@ return [
 
     // ─── Remetente ───────────────────────────────────────────
     'from_email' => 'seuemail@gmail.com',
-    'from_name'  => 'Instituto Politécnico do Mayombe',
+    'from_name'  => 'Inst. Politécnico do Maiombe IB Sequele Nº 3050',
 
     // ─── Configurações opcionais ─────────────────────────────
     'debug'      => false,  // true = mostra log SMTP no output (só em desenvolvimento)

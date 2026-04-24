@@ -104,7 +104,7 @@ if ($anoActivo) {
             d.sigla AS disciplina_sigla,
             p.nome  AS professor_nome,
             tr.nome AS trimestre_nome,
-            n.media, n.estado, n.prova_professor, n.avaliacao, n.prova_trimestre
+            n.media, n.estado, n.p1, n.p2, n.trabalho, n.exame
         FROM notas n
         JOIN disciplinas d  ON n.disciplina_id = d.id
         JOIN professores p  ON n.professor_id  = p.id
@@ -117,10 +117,11 @@ if ($anoActivo) {
     $stmtN->execute();
     $notasActuais = $stmtN->get_result()->fetch_all(MYSQLI_ASSOC);
     foreach ($notasActuais as &$n) {
-        $n['media']           = $n['media']           !== null ? floatval($n['media'])           : null;
-        $n['prova_professor'] = $n['prova_professor']  !== null ? floatval($n['prova_professor']) : null;
-        $n['avaliacao']       = $n['avaliacao']        !== null ? floatval($n['avaliacao'])       : null;
-        $n['prova_trimestre'] = $n['prova_trimestre']  !== null ? floatval($n['prova_trimestre']) : null;
+        $n['media']    = $n['media']    !== null ? floatval($n['media'])    : null;
+        $n['p1']       = $n['p1']       !== null ? floatval($n['p1'])       : null;
+        $n['p2']       = $n['p2']       !== null ? floatval($n['p2'])       : null;
+        $n['trabalho'] = $n['trabalho'] !== null ? floatval($n['trabalho']) : null;
+        $n['exame']    = $n['exame']    !== null ? floatval($n['exame'])    : null;
     }
 }
 

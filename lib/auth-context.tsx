@@ -19,6 +19,8 @@ export interface User {
   turma?: string        // aluno (nome)
   curso?: string        // aluno
   ano?: number          // aluno
+  telefone?: string     // aluno
+  dataNascimento?: string // aluno (YYYY-MM-DD)
   departamento?: string // professor
   alunoId?: number      // encarregado
   alunoNome?: string    // encarregado
@@ -41,6 +43,7 @@ interface AuthContextType {
   error: string | null
   login: (type: UserType, credentials: LoginCredentials) => Promise<boolean>
   logout: () => void
+  updateUser: (partial: Partial<User>) => void
   clearError: () => void
 }
 
@@ -55,11 +58,13 @@ function normalizeUser(type: UserType, raw: Record<string, unknown>): User {
     foto: (raw.foto as string | undefined) || "/placeholder-user.jpg",
   }
   if (type === "aluno") {
-    base.numeroAluno = raw.numero as string
-    base.turmaId     = raw.turma_id ? Number(raw.turma_id) : undefined
-    base.turma       = raw.turma    as string | undefined
-    base.curso       = raw.curso    as string | undefined
-    base.ano         = raw.ano      ? Number(raw.ano) : undefined
+    base.numeroAluno    = raw.numero           as string
+    base.turmaId        = raw.turma_id ? Number(raw.turma_id) : undefined
+    base.turma          = raw.turma            as string | undefined
+    base.curso          = raw.curso            as string | undefined
+    base.ano            = raw.ano      ? Number(raw.ano) : undefined
+    base.telefone       = raw.telefone         as string | undefined
+    base.dataNascimento = raw.data_nascimento  as string | undefined
   }
   if (type === "professor") {
     base.departamento = raw.departamento as string | undefined
@@ -141,12 +146,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(TOKEN_KEY)
   }
 
+  const updateUser = (partial: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const updated = { ...prev, ...partial }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+      return updated
+    })
+  }
+
   return (
     <AuthContext.Provider value={{
       user, token,
       isAuthenticated: !!user && !!token,
       isLoading, error,
-      login, logout,
+      login, logout, updateUser,
       clearError: () => setError(null),
     }}>
       {children}

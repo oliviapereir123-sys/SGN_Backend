@@ -47,6 +47,20 @@ $stmtAprovar->bind_param("iiii", $adminId, $turmaId, $disciplinaId, $trimestreId
 $stmtAprovar->execute();
 $aprovadas = $stmtAprovar->affected_rows;
 
+// Marcar em_recurso=1 para médias entre 7 e 9 após aprovação em lote
+$conn->query("
+    UPDATE notas n
+    JOIN alunos a ON n.aluno_id = a.id
+    SET n.em_recurso = CASE
+        WHEN n.media IS NOT NULL AND n.media >= 7 AND n.media < 10 THEN 1
+        ELSE n.em_recurso
+    END
+    WHERE a.turma_id      = $turmaId
+      AND n.disciplina_id = $disciplinaId
+      AND n.trimestre_id  = $trimestreId
+      AND n.estado        = 'Aprovado'
+");
+
 if ($aprovadas === 0) {
     echo json_encode([
         'success'   => true,

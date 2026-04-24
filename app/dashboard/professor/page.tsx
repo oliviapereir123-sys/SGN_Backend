@@ -198,9 +198,10 @@ export default function ProfessorDashboard() {
                           <Users className="w-3.5 h-3.5" /> Registar Frequências
                         </Link>
                       </Button>
+                      {/* Botão de acesso rápido a Horários em vez de Avaliações */}
                       <Button size="sm" variant="secondary" className="w-full justify-start gap-2 bg-white/10 hover:bg-white/20 text-white border-0 text-xs" asChild>
-                        <Link href="/dashboard/professor/avaliacoes">
-                          <Clock className="w-3.5 h-3.5" /> Calendário de Avaliações
+                        <Link href="/dashboard/professor/horarios">
+                          <Clock className="w-3.5 h-3.5" /> Horário de Aulas
                         </Link>
                       </Button>
                     </CardContent>

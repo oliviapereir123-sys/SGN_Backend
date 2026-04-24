@@ -136,7 +136,7 @@ export default function EncarregadoLoginPage() {
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">IPM — Mayombe</p>
+              <p className="text-sm font-semibold text-foreground">IPM — Maiombe</p>
               <p className="text-xs">Sistema de Gestão Escolar</p>
             </div>
           </div>

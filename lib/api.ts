@@ -2,7 +2,7 @@
 
 /**
  * API Client — SGN (Sistema de Gestão de Notas)
- * IPM Mayombe
+ * IPM Maiombe
  *
  * Envia automaticamente o token JWT no header Authorization: Bearer <token>
  */
@@ -86,6 +86,7 @@ export interface AlunoTurma {
   estado: string
   nota_id: number | null
   feedback: string | null
+  em_recurso?: boolean
 }
 
 export async function getAlunosTurma(
@@ -122,10 +123,11 @@ export interface NotaPayload {
   feedback?: string | null
 }
 
-export async function submitNotas(data: NotaPayload[]) {
+export async function submitNotas(data: NotaPayload[], modo: "rascunho" | "submeter" = "submeter") {
+  const payload = data.map((n) => ({ ...n, modo: modo === "rascunho" ? "rascunho" : "submeter" }))
   return apiFetch("/notas/submit.php", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   })
 }
 
@@ -559,10 +561,84 @@ export interface AnoLectivo {
   inicio: string
   fim: string
   estado: string
+  trimestres?: Trimestre[]
+}
+
+export interface Trimestre {
+  id: number
+  nome: string
+  inicio: string
+  fim: string
+  estado: string
+  bloqueado: number
 }
 
 export async function getAnosLectivos(): Promise<{ success: boolean; data: AnoLectivo[] }> {
   return apiFetch("/anos_lectivos/get.php")
+}
+
+export async function getAnosLectivosAdmin(): Promise<{ success: boolean; data: AnoLectivo[] }> {
+  return apiFetch("/admin/anos_lectivos.php")
+}
+
+export async function createAnoLectivo(payload: {
+  nome: string; inicio: string; fim: string; estado: string
+  trimestres?: { nome: string; inicio: string; fim: string; estado: string }[]
+}): Promise<{ success: boolean; id: number }> {
+  return apiFetch("/admin/anos_lectivos.php", { method: "POST", body: JSON.stringify(payload) })
+}
+
+export async function updateAnoLectivo(payload: {
+  id: number; nome: string; inicio: string; fim: string; estado: string
+}): Promise<{ success: boolean }> {
+  return apiFetch("/admin/anos_lectivos.php", { method: "PUT", body: JSON.stringify({ ...payload, tipo: "ano" }) })
+}
+
+export async function deleteAnoLectivo(id: number): Promise<{ success: boolean }> {
+  return apiFetch(`/admin/anos_lectivos.php?id=${id}&tipo=ano`, { method: "DELETE" })
+}
+
+export async function updateTrimestre(payload: {
+  id: number; nome?: string; inicio?: string; fim?: string; estado?: string; bloqueado?: number
+}): Promise<{ success: boolean }> {
+  return apiFetch("/admin/anos_lectivos.php", { method: "PUT", body: JSON.stringify({ ...payload, tipo: "trimestre" }) })
+}
+
+export async function deleteTrimestre(id: number): Promise<{ success: boolean }> {
+  return apiFetch(`/admin/anos_lectivos.php?id=${id}&tipo=trimestre`, { method: "DELETE" })
+}
+
+// ─── Cursos ───────────────────────────────────────────────────
+
+export interface Curso {
+  id: number
+  nome: string
+  sigla: string
+  estado: string
+  total_disciplinas?: number
+  total_turmas?: number
+}
+
+export async function getAdminCursos(): Promise<{ success: boolean; data: Curso[] }> {
+  return apiFetch("/admin/cursos.php")
+}
+
+export async function createCurso(payload: { nome: string; sigla: string }): Promise<{ success: boolean; id: number }> {
+  return apiFetch("/admin/cursos.php", { method: "POST", body: JSON.stringify(payload) })
+}
+
+export async function updateCurso(payload: { id: number; nome: string; sigla: string; estado: string }): Promise<{ success: boolean }> {
+  return apiFetch("/admin/cursos.php", { method: "PUT", body: JSON.stringify(payload) })
+}
+
+export async function deleteCurso(id: number): Promise<{ success: boolean }> {
+  return apiFetch(`/admin/cursos.php?id=${id}`, { method: "DELETE" })
+}
+
+// ─── Admin Stats ──────────────────────────────────────────────
+
+export async function getAdminStats() {
+  return apiFetch("/admin/stats.php")
 }
 
 export async function getAdminProfessores(): Promise<{ success: boolean; data: { id: number; nome: string; email: string }[] }> {

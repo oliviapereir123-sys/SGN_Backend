@@ -7,7 +7,7 @@ export function AboutSection() {
   const values = [
     { icon: Target, title: "Missão", desc: "Formar profissionais competentes e éticos, preparados para os desafios do mercado de trabalho angolano e global." },
     { icon: Eye, title: "Visão", desc: "Ser a instituição politécnica de referência em Angola, reconhecida pela excelência académica e inovação pedagógica." },
-    { icon: Heart, title: "Valores", desc: "Integridade, excelência, responsabilidade social e compromisso com o desenvolvimento da região do Mayombe." },
+    { icon: Heart, title: "Valores", desc: "Integridade, excelência, responsabilidade social e compromisso com o desenvolvimento da região do Maiombe." },
   ]
 
   return (
@@ -31,8 +31,8 @@ export function AboutSection() {
               <span className="text-primary">futuro de Angola</span>
             </h2>
             <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-              O Instituto Politécnico do Mayombe é uma instituição de ensino técnico-profissional
-              localizada em Cabinda, dedicada à formação de quadros qualificados nas áreas de
+              O Instituto Politécnico  Maiombe  Nº 3050 IB - SEQUELE é uma instituição de ensino técnico-profissional
+              localizada na província de Icolo E Bengo, dedicada à formação de quadros qualificados nas áreas de
               Contabilidade e Informática de Gestão.
             </p>
             <p className="text-muted-foreground leading-relaxed">

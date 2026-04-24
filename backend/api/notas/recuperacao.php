@@ -131,6 +131,14 @@ if ($method === 'POST') {
         $mediaFinal = round((floatval($nota['media']) + $notaRecuperacao) / 2.0, 2);
     }
 
+    // Actualizar flag de recurso: continua em recurso se média final < 10
+    if ($mediaFinal !== null) {
+        $emRecurso = $mediaFinal >= 10 ? 0 : 1;
+        $updFlag = $conn->prepare("UPDATE notas SET em_recurso = ? WHERE id = ?");
+        $updFlag->bind_param('ii', $emRecurso, $notaId);
+        $updFlag->execute();
+    }
+
     echo json_encode([
         'success'    => true,
         'message'    => 'Nota de recuperação guardada',

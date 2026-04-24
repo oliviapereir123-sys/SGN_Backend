@@ -2,7 +2,16 @@
 /**
  * API Boletim Anual — médias dos 3 trimestres + situação final
  * GET ?alunoId=X&anoLectivoId=Y
- * Acessível: aluno (só o próprio), encarregado (só o seu educando), admin, professor
+ *
+ * Fórmula de média trimestral:
+ *   MAC = (Prova Professor × 0.30) + (Avaliação × 0.30) + (Prova Trimestre × 0.40)
+ *
+ * CORRECÇÃO dos critérios de situação:
+ *   0  – 6.9  → Reprovado
+ *   7  – 9.9  → Recurso
+ *   10 – 20   → Aprovado
+ *
+ * Situação final: Aprovado apenas se media_anual >= 10 E sem disciplinas Reprovadas.
  */
 require_once __DIR__ . '/../../config/Headers.php';
 require_once __DIR__ . '/../../config/Database.php';
@@ -34,7 +43,7 @@ if ($auth['type'] === 'encarregado') {
     }
 }
 
-// Se não especificado, usar ano lectivo activo
+// Ano lectivo activo se não especificado
 if (!$anoId) {
     $r = $conn->query("SELECT id FROM anos_lectivos WHERE estado='Activo' LIMIT 1")->fetch_assoc();
     $anoId = $r ? intval($r['id']) : 0;
@@ -47,8 +56,8 @@ $stmtAluno = $conn->prepare("
            c.nome AS curso_nome, c.sigla AS curso_sigla,
            al.nome AS ano_lectivo
     FROM alunos a
-    JOIN turmas t        ON a.turma_id = t.id
-    JOIN cursos c        ON t.curso_id = c.id
+    JOIN turmas t         ON a.turma_id = t.id
+    JOIN cursos c         ON t.curso_id = c.id
     JOIN anos_lectivos al ON al.id = ?
     WHERE a.id = ?
 ");
@@ -62,7 +71,7 @@ if (!$aluno) {
     exit();
 }
 
-// Buscar notas aprovadas dos 3 trimestres do ano
+// Notas aprovadas dos 3 trimestres
 $stmtNotas = $conn->prepare("
     SELECT
         n.disciplina_id,
@@ -71,14 +80,22 @@ $stmtNotas = $conn->prepare("
         d.creditos,
         tr.id       AS trimestre_id,
         tr.nome     AS trimestre_nome,
-        n.p1, n.p2, n.trabalho, n.exame,
-        -- MAC = (P1 + P2 + Trabalho) / 3
-        CASE WHEN n.p1 IS NOT NULL AND n.p2 IS NOT NULL AND n.trabalho IS NOT NULL
-             THEN ROUND((n.p1 + n.p2 + n.trabalho) / 3.0, 2)
-             ELSE NULL END AS mac,
+        n.p1        AS p1,
+        n.trabalho  AS trabalho,
+        n.exame     AS exame,
+        CASE
+            WHEN n.p1 IS NOT NULL
+             AND n.trabalho IS NOT NULL
+             AND n.exame IS NOT NULL
+            THEN ROUND(
+                n.p1       * 0.30 +
+                n.trabalho * 0.30 +
+                n.exame    * 0.40,
+                2)
+            ELSE NULL
+        END AS mac,
         n.media     AS media_trimestral,
         n.nota_recuperacao,
-        -- Média final do trimestre (se tiver recuperação)
         CASE WHEN n.nota_recuperacao IS NOT NULL AND n.media IS NOT NULL
              THEN ROUND((n.media + n.nota_recuperacao) / 2.0, 2)
              ELSE n.media END AS media_final_trimestral
@@ -109,20 +126,26 @@ foreach ($notas as $n) {
         ];
     }
     $disciplinas[$did]['trimestres'][$n['trimestre_id']] = [
-        'trimestre_id'          => intval($n['trimestre_id']),
-        'trimestre_nome'        => $n['trimestre_nome'],
-        'p1'                    => $n['p1'] !== null ? floatval($n['p1']) : null,
-        'p2'                    => $n['p2'] !== null ? floatval($n['p2']) : null,
-        'trabalho'              => $n['trabalho'] !== null ? floatval($n['trabalho']) : null,
-        'exame'                 => $n['exame'] !== null ? floatval($n['exame']) : null,
-        'mac'                   => $n['mac'] !== null ? floatval($n['mac']) : null,
-        'media_trimestral'      => $n['media_trimestral'] !== null ? floatval($n['media_trimestral']) : null,
-        'nota_recuperacao'      => $n['nota_recuperacao'] !== null ? floatval($n['nota_recuperacao']) : null,
-        'media_final_trimestral'=> $n['media_final_trimestral'] !== null ? floatval($n['media_final_trimestral']) : null,
+        'trimestre_id'           => intval($n['trimestre_id']),
+        'trimestre_nome'         => $n['trimestre_nome'],
+        'p1'                     => $n['p1']                     !== null ? floatval($n['p1'])                     : null,
+        'trabalho'               => $n['trabalho']               !== null ? floatval($n['trabalho'])               : null,
+        'exame'                  => $n['exame']                  !== null ? floatval($n['exame'])                  : null,
+        'mac'                    => $n['mac']                    !== null ? floatval($n['mac'])                    : null,
+        'media_trimestral'       => $n['media_trimestral']       !== null ? floatval($n['media_trimestral'])       : null,
+        'nota_recuperacao'       => $n['nota_recuperacao']       !== null ? floatval($n['nota_recuperacao'])       : null,
+        'media_final_trimestral' => $n['media_final_trimestral'] !== null ? floatval($n['media_final_trimestral']) : null,
     ];
 }
 
-// Calcular média anual por disciplina
+// Calcular média anual e situação por disciplina — critérios corrigidos
+function getSituacao(float|null $media): string {
+    if ($media === null)  return 'Pendente';
+    if ($media >= 10)     return 'Aprovado';
+    if ($media >= 7)      return 'Recurso';
+    return 'Reprovado';
+}
+
 $resumo = [];
 foreach ($disciplinas as $did => $d) {
     $medias = array_filter(
@@ -133,50 +156,53 @@ foreach ($disciplinas as $did => $d) {
         ? round(array_sum($medias) / count($medias), 2)
         : null;
 
-    $situacao = $mediaAnual !== null
-        ? ($mediaAnual >= 10 ? 'Aprovado' : 'Reprovado')
-        : 'Pendente';
-
     $resumo[] = [
         ...$d,
-        'trimestres'   => array_values($d['trimestres']),
-        'media_anual'  => $mediaAnual,
-        'situacao'     => $situacao,
+        'trimestres'  => array_values($d['trimestres']),
+        'media_anual' => $mediaAnual,
+        'situacao'    => getSituacao($mediaAnual),
     ];
 }
 
-// Ordenar por nome
 usort($resumo, fn($a, $b) => strcmp($a['disciplina_nome'], $b['disciplina_nome']));
 
-// Totais
-$todasComNota     = array_filter($resumo, fn($r) => $r['media_anual'] !== null);
-$mediaGeralAnual  = count($todasComNota) > 0
+// Totais — agora com Recurso como categoria própria
+$todasComNota    = array_filter($resumo, fn($r) => $r['media_anual'] !== null);
+$mediaGeralAnual = count($todasComNota) > 0
     ? round(array_sum(array_column($todasComNota, 'media_anual')) / count($todasComNota), 2)
     : null;
-$aprovadas   = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Aprovado'));
-$reprovadas  = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Reprovado'));
-$pendentes   = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Pendente'));
-$total       = count($resumo);
 
-// Situação final do aluno: aprovado se média anual geral >= 10 E sem disciplinas reprovadas
+$aprovadas  = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Aprovado'));
+$recurso    = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Recurso'));
+$reprovadas = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Reprovado'));
+$pendentes  = count(array_filter($resumo, fn($r) => $r['situacao'] === 'Pendente'));
+$total      = count($resumo);
+
+// Situação final: aprovado se sem Reprovadas E sem Recurso E média >= 10
 $situacaoFinal = 'Pendente';
 if ($pendentes === 0) {
-    $situacaoFinal = ($reprovadas === 0 && $mediaGeralAnual !== null && $mediaGeralAnual >= 10)
-        ? 'Aprovado' : 'Reprovado';
+    if ($reprovadas === 0 && $recurso === 0 && $mediaGeralAnual !== null && $mediaGeralAnual >= 10) {
+        $situacaoFinal = 'Aprovado';
+    } elseif ($recurso > 0 && $reprovadas === 0) {
+        $situacaoFinal = 'Recurso';
+    } else {
+        $situacaoFinal = 'Reprovado';
+    }
 }
 
 echo json_encode([
-    'success'  => true,
-    'aluno'    => $aluno,
+    'success'        => true,
+    'aluno'          => $aluno,
     'ano_lectivo_id' => $anoId,
-    'disciplinas' => $resumo,
-    'resumo'   => [
-        'total_disciplinas' => $total,
-        'aprovadas'         => $aprovadas,
-        'reprovadas'        => $reprovadas,
-        'pendentes'         => $pendentes,
-        'media_geral_anual' => $mediaGeralAnual,
-        'situacao_final'    => $situacaoFinal,
+    'disciplinas'    => $resumo,
+    'resumo'         => [
+        'total_disciplinas'  => $total,
+        'aprovadas'          => $aprovadas,
+        'recurso'            => $recurso,
+        'reprovadas'         => $reprovadas,
+        'pendentes'          => $pendentes,
+        'media_geral_anual'  => $mediaGeralAnual,
+        'situacao_final'     => $situacaoFinal,
     ],
 ]);
 $db->closeConnection();

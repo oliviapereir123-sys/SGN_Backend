@@ -30,7 +30,7 @@ const emptyForm = {
   sala: "", capacidade: "30", estado: "Activa",
 }
 
-const TURNOS = ["Matutino", "Vespertino", "Nocturno"]
+const TURNOS = ["Manhã", "Tarde"]
 
 export default function AdminTurmasPage() {
   const router = useRouter()
@@ -212,6 +212,7 @@ export default function AdminTurmasPage() {
                       <SelectItem value="10">10º Ano</SelectItem>
                       <SelectItem value="11">11º Ano</SelectItem>
                       <SelectItem value="12">12º Ano</SelectItem>
+                      <SelectItem value="13">13º Ano</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button variant="outline" onClick={carregar}>Pesquisar</Button>
@@ -319,6 +320,7 @@ export default function AdminTurmasPage() {
                     <SelectItem value="10">10º Ano</SelectItem>
                     <SelectItem value="11">11º Ano</SelectItem>
                     <SelectItem value="12">12º Ano</SelectItem>
+                    <SelectItem value="13">13º Ano</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

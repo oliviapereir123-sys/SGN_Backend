@@ -1,7 +1,7 @@
 <?php
 /**
  * EmailTemplate.php — Boletim HTML para email
- * Fórmula Angola: Média = P1×20% + P2×20% + Trabalho×20% + Exame×40%
+ * Fórmula: Média = MAC×30% + PP×30% + PT×40%
  */
 class EmailTemplate {
 
@@ -23,7 +23,6 @@ class EmailTemplate {
             $corRes    = floatval($nota['media']) >= 10 ? '#16a34a' : '#dc2626';
 
             $p1  = $nota['p1']       !== null ? number_format(floatval($nota['p1']),       1, ',', '') : '—';
-            $p2  = $nota['p2']       !== null ? number_format(floatval($nota['p2']),       1, ',', '') : '—';
             $trab = $nota['trabalho'] !== null ? number_format(floatval($nota['trabalho']), 1, ',', '') : '—';
             $ex  = $nota['exame']    !== null ? number_format(floatval($nota['exame']),    1, ',', '') : '—';
 
@@ -35,9 +34,8 @@ class EmailTemplate {
             $linhasNotas .= "
             <tr style='background-color:{$bgRow};'>
               <td style='padding:12px 16px;border-bottom:1px solid #e5e7eb;font-weight:500;color:#111827;'>{$nota['disciplina_nome']}</td>
-              <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#374151;'>{$p1}</td>
-              <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#374151;'>{$p2}</td>
               <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#374151;'>{$trab}</td>
+              <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#374151;'>{$p1}</td>
               <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;color:#374151;'>{$ex}</td>
               <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:700;color:{$corMedia};font-size:16px;'>{$media}</td>
               <td style='padding:12px 8px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:600;color:{$corRes};'>{$resultado}</td>
@@ -53,7 +51,7 @@ class EmailTemplate {
 <body style="margin:0;padding:0;background:#f3f4f6;font-family:'Segoe UI',Arial,sans-serif;">
   <div style="max-width:700px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10);">
     <div style="background:linear-gradient(135deg,#1e40af,#7c3aed);padding:32px 40px;text-align:center;">
-      <h1 style="color:#fff;margin:0 0 4px;font-size:22px;">Instituto Politécnico do Mayombe</h1>
+      <h1 style="color:#fff;margin:0 0 4px;font-size:22px;">Inst. Politécnico do Maiombe IB Sequele Nº 3050</h1>
       <p style="color:rgba(255,255,255,0.85);margin:0;">Boletim de Avaliação — {$trimestre['nome']}</p>
       <p style="color:rgba(255,255,255,0.70);margin:8px 0 0;font-size:13px;">Ano Lectivo {$anoLectivo}</p>
     </div>
@@ -73,10 +71,9 @@ class EmailTemplate {
           <thead>
             <tr style="background:#f8f9fa;">
               <th style="padding:12px 16px;text-align:left;border-bottom:2px solid #e5e7eb;">Disciplina</th>
-              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">P1<br><span style="font-weight:400;color:#9ca3af;">20%</span></th>
-              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">P2<br><span style="font-weight:400;color:#9ca3af;">20%</span></th>
-              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">Trab.<br><span style="font-weight:400;color:#9ca3af;">20%</span></th>
-              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">Exame<br><span style="font-weight:400;color:#9ca3af;">40%</span></th>
+              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">MAC<br><span style="font-weight:400;color:#9ca3af;">30%</span></th>
+              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">PP<br><span style="font-weight:400;color:#9ca3af;">30%</span></th>
+              <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;font-size:12px;">PT<br><span style="font-weight:400;color:#9ca3af;">40%</span></th>
               <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;">Média</th>
               <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;">Resultado</th>
             </tr>
@@ -107,7 +104,7 @@ class EmailTemplate {
       </div>
     </div>
     <div style="background:#f8fafc;border-top:1px solid #e5e7eb;padding:24px 40px;text-align:center;">
-      <p style="color:#374151;font-weight:600;margin:0 0 4px;">Instituto Politécnico do Mayombe</p>
+      <p style="color:#374151;font-weight:600;margin:0 0 4px;">Inst. Politécnico  Maiombe IB Sequele Nº 3050</p>
       <p style="color:#9ca3af;font-size:12px;margin:0 0 4px;">Buco Zau, Cabinda, Angola</p>
       <p style="color:#d1d5db;font-size:11px;margin:0;">Documento gerado automaticamente pelo SGN em {$dataEmissao}</p>
     </div>

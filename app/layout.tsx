@@ -6,11 +6,11 @@ import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Instituto Politécnico do Mayombe - Sistema de Gestão Escolar",
+  title: "Inst. Politécnico do Maiombe IB Sequele Nº 3050 - Sistema de Gestão Escolar",
   description:
-    "Excelência no ensino técnico e profissional em Angola. Sistema moderno de gestão de notas e avaliações.",
-  keywords: ["escola", "angola", "mayombe", "ensino técnico", "gestão escolar", "notas"],
-    generator: 'v0.app'
+    "Excelência no ensino técnico e profissional em Angola. Sistema moderno de gestão de notas e avaliações do Inst. Politécnico do Maiombe IB Sequele Nº 3050.",
+  keywords: ["escola", "angola", "maiombe", "ensino técnico", "gestão escolar", "notas"],
+  generator: "v0.app",
 }
 
 export const viewport: Viewport = {

@@ -1,7 +1,7 @@
 <?php
 /**
  * SGN — Script de Dados Iniciais
- * Instituto Politécnico do Mayombe
+ * Instituto Politécnico do Maiombe
  *
  * Executar UMA VEZ após o 01_schema.sql:
  *   php backend/database/02_populate.php
@@ -54,7 +54,7 @@ function hash_senha(string $senha): string {
 $log[] = "\n=== ADMIN ===";
 inserir($pdo, 'admin', [
     'nome'     => 'António Ferreira',
-    'email'    => 'admin@ipmayombe.ao',
+    'email'    => 'admin@ipMaiombe.ao',
     'password' => hash_senha('Admin@IPM2024'),
 ], $log, $erros);
 
@@ -63,14 +63,14 @@ inserir($pdo, 'admin', [
 $log[] = "\n=== PROFESSORES ===";
 
 $professores_data = [
-    ['nome' => 'Maria dos Santos',    'email' => 'maria.santos@ipmayombe.ao',    'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Santos24'],
-    ['nome' => 'Carlos Mendes',       'email' => 'carlos.mendes@ipmayombe.ao',   'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Mendes24'],
-    ['nome' => 'Manuel Gomes',        'email' => 'manuel.gomes@ipmayombe.ao',    'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Gomes24'],
-    ['nome' => 'Ana Costa',           'email' => 'ana.costa@ipmayombe.ao',       'dep' => 'Ciências Exactas',      'senha' => 'Prof@Costa24'],
-    ['nome' => 'Pedro Alves',         'email' => 'pedro.alves@ipmayombe.ao',     'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Alves24'],
-    ['nome' => 'Teresa Almeida',      'email' => 'teresa.almeida@ipmayombe.ao',  'dep' => 'Ciências Sociais',      'senha' => 'Prof@Almeida24'],
-    ['nome' => 'David Sousa',         'email' => 'david.sousa@ipmayombe.ao',     'dep' => 'Ciências Sociais',      'senha' => 'Prof@Sousa24'],
-    ['nome' => 'António Silva',       'email' => 'antonio.silva@ipmayombe.ao',   'dep' => 'Ciências Sociais',      'senha' => 'Prof@Silva24'],
+    ['nome' => 'Maria dos Santos',    'email' => 'maria.santos@ipMaiombe.ao',    'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Santos24'],
+    ['nome' => 'Carlos Mendes',       'email' => 'carlos.mendes@ipMaiombe.ao',   'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Mendes24'],
+    ['nome' => 'Manuel Gomes',        'email' => 'manuel.gomes@ipMaiombe.ao',    'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Gomes24'],
+    ['nome' => 'Ana Costa',           'email' => 'ana.costa@ipMaiombe.ao',       'dep' => 'Ciências Exactas',      'senha' => 'Prof@Costa24'],
+    ['nome' => 'Pedro Alves',         'email' => 'pedro.alves@ipMaiombe.ao',     'dep' => 'Ciências e Tecnologia', 'senha' => 'Prof@Alves24'],
+    ['nome' => 'Teresa Almeida',      'email' => 'teresa.almeida@ipMaiombe.ao',  'dep' => 'Ciências Sociais',      'senha' => 'Prof@Almeida24'],
+    ['nome' => 'David Sousa',         'email' => 'david.sousa@ipMaiombe.ao',     'dep' => 'Ciências Sociais',      'senha' => 'Prof@Sousa24'],
+    ['nome' => 'António Silva',       'email' => 'antonio.silva@ipMaiombe.ao',   'dep' => 'Ciências Sociais',      'senha' => 'Prof@Silva24'],
 ];
 
 $prof_ids = [];
@@ -99,39 +99,39 @@ $turmas = $pdo->query("SELECT id, nome FROM turmas")->fetchAll(PDO::FETCH_KEY_PA
 
 $alunos_data = [
     // Contabilidade 10º A
-    ['num'=>'2024010001','nome'=>'João Manuel da Silva',      'email'=>'joao.silva@aluno.ipmayombe.ao',      'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024010002','nome'=>'Ana Beatriz Ferreira',      'email'=>'ana.ferreira@aluno.ipmayombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024010003','nome'=>'Pedro Miguel Santos',       'email'=>'pedro.santos@aluno.ipmayombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024010004','nome'=>'Maria José Costa',          'email'=>'maria.costa@aluno.ipmayombe.ao',     'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024010005','nome'=>'Carlos Eduardo Gomes',      'email'=>'carlos.gomes@aluno.ipmayombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024010001','nome'=>'João Manuel da Silva',      'email'=>'joao.silva@aluno.ipMaiombe.ao',      'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024010002','nome'=>'Ana Beatriz Ferreira',      'email'=>'ana.ferreira@aluno.ipMaiombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024010003','nome'=>'Pedro Miguel Santos',       'email'=>'pedro.santos@aluno.ipMaiombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024010004','nome'=>'Maria José Costa',          'email'=>'maria.costa@aluno.ipMaiombe.ao',     'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024010005','nome'=>'Carlos Eduardo Gomes',      'email'=>'carlos.gomes@aluno.ipMaiombe.ao',    'turma'=>'CONT-10A','senha'=>'Aluno@2024'],
     // Contabilidade 11º A
-    ['num'=>'2023010001','nome'=>'Luísa Helena Martins',      'email'=>'luisa.martins@aluno.ipmayombe.ao',   'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023010002','nome'=>'Ricardo António Sousa',     'email'=>'ricardo.sousa@aluno.ipmayombe.ao',   'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023010003','nome'=>'Sofia Margarida Alves',     'email'=>'sofia.alves@aluno.ipmayombe.ao',     'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023010004','nome'=>'Filipe Augusto Neto',       'email'=>'filipe.neto@aluno.ipmayombe.ao',     'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023010005','nome'=>'Beatriz Conceição Lima',    'email'=>'beatriz.lima@aluno.ipmayombe.ao',    'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023010001','nome'=>'Luísa Helena Martins',      'email'=>'luisa.martins@aluno.ipMaiombe.ao',   'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023010002','nome'=>'Ricardo António Sousa',     'email'=>'ricardo.sousa@aluno.ipMaiombe.ao',   'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023010003','nome'=>'Sofia Margarida Alves',     'email'=>'sofia.alves@aluno.ipMaiombe.ao',     'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023010004','nome'=>'Filipe Augusto Neto',       'email'=>'filipe.neto@aluno.ipMaiombe.ao',     'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023010005','nome'=>'Beatriz Conceição Lima',    'email'=>'beatriz.lima@aluno.ipMaiombe.ao',    'turma'=>'CONT-11A','senha'=>'Aluno@2024'],
     // Contabilidade 12º A
-    ['num'=>'2022010001','nome'=>'Adelino José Tavares',      'email'=>'adelino.tavares@aluno.ipmayombe.ao', 'turma'=>'CONT-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022010002','nome'=>'Conceição Maria Baptista',  'email'=>'conceicao.baptista@aluno.ipmayombe.ao','turma'=>'CONT-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022010003','nome'=>'Domingos Paulo Lopes',      'email'=>'domingos.lopes@aluno.ipmayombe.ao',  'turma'=>'CONT-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022010001','nome'=>'Adelino José Tavares',      'email'=>'adelino.tavares@aluno.ipMaiombe.ao', 'turma'=>'CONT-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022010002','nome'=>'Conceição Maria Baptista',  'email'=>'conceicao.baptista@aluno.ipMaiombe.ao','turma'=>'CONT-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022010003','nome'=>'Domingos Paulo Lopes',      'email'=>'domingos.lopes@aluno.ipMaiombe.ao',  'turma'=>'CONT-12A','senha'=>'Aluno@2024'],
     // Informática 10º A
-    ['num'=>'2024020001','nome'=>'Esperança Filomena Dias',   'email'=>'esperanca.dias@aluno.ipmayombe.ao',  'turma'=>'IG-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024020002','nome'=>'Francisco Albino Rocha',    'email'=>'francisco.rocha@aluno.ipmayombe.ao', 'turma'=>'IG-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024020003','nome'=>'Graça Isabelina Pinto',     'email'=>'graca.pinto@aluno.ipmayombe.ao',     'turma'=>'IG-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024020004','nome'=>'Hélder Justino Cardoso',    'email'=>'helder.cardoso@aluno.ipmayombe.ao',  'turma'=>'IG-10A','senha'=>'Aluno@2024'],
-    ['num'=>'2024020005','nome'=>'Inês Karina Monteiro',      'email'=>'ines.monteiro@aluno.ipmayombe.ao',   'turma'=>'IG-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024020001','nome'=>'Esperança Filomena Dias',   'email'=>'esperanca.dias@aluno.ipMaiombe.ao',  'turma'=>'IG-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024020002','nome'=>'Francisco Albino Rocha',    'email'=>'francisco.rocha@aluno.ipMaiombe.ao', 'turma'=>'IG-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024020003','nome'=>'Graça Isabelina Pinto',     'email'=>'graca.pinto@aluno.ipMaiombe.ao',     'turma'=>'IG-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024020004','nome'=>'Hélder Justino Cardoso',    'email'=>'helder.cardoso@aluno.ipMaiombe.ao',  'turma'=>'IG-10A','senha'=>'Aluno@2024'],
+    ['num'=>'2024020005','nome'=>'Inês Karina Monteiro',      'email'=>'ines.monteiro@aluno.ipMaiombe.ao',   'turma'=>'IG-10A','senha'=>'Aluno@2024'],
     // Informática 11º A
-    ['num'=>'2023020001','nome'=>'Jorge Lemos Nkosi',         'email'=>'jorge.nkosi@aluno.ipmayombe.ao',     'turma'=>'IG-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023020002','nome'=>'Kátia Mariana Oliveira',    'email'=>'katia.oliveira@aluno.ipmayombe.ao',  'turma'=>'IG-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023020003','nome'=>'Leonel Afonso Queta',       'email'=>'leonel.queta@aluno.ipmayombe.ao',    'turma'=>'IG-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023020004','nome'=>'Marlene Beatriz Teixeira',  'email'=>'marlene.teixeira@aluno.ipmayombe.ao','turma'=>'IG-11A','senha'=>'Aluno@2024'],
-    ['num'=>'2023020005','nome'=>'Nelson Cunha Brito',        'email'=>'nelson.brito@aluno.ipmayombe.ao',    'turma'=>'IG-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023020001','nome'=>'Jorge Lemos Nkosi',         'email'=>'jorge.nkosi@aluno.ipMaiombe.ao',     'turma'=>'IG-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023020002','nome'=>'Kátia Mariana Oliveira',    'email'=>'katia.oliveira@aluno.ipMaiombe.ao',  'turma'=>'IG-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023020003','nome'=>'Leonel Afonso Queta',       'email'=>'leonel.queta@aluno.ipMaiombe.ao',    'turma'=>'IG-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023020004','nome'=>'Marlene Beatriz Teixeira',  'email'=>'marlene.teixeira@aluno.ipMaiombe.ao','turma'=>'IG-11A','senha'=>'Aluno@2024'],
+    ['num'=>'2023020005','nome'=>'Nelson Cunha Brito',        'email'=>'nelson.brito@aluno.ipMaiombe.ao',    'turma'=>'IG-11A','senha'=>'Aluno@2024'],
     // Informática 12º A
-    ['num'=>'2022020001','nome'=>'Olga Perpétua Vieira',      'email'=>'olga.vieira@aluno.ipmayombe.ao',     'turma'=>'IG-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022020002','nome'=>'Paulo Quissanga Luvualo',   'email'=>'paulo.luvualo@aluno.ipmayombe.ao',   'turma'=>'IG-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022020003','nome'=>'Quitéria Rosa Mendonça',    'email'=>'quiteria.mendonca@aluno.ipmayombe.ao','turma'=>'IG-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022020004','nome'=>'Raimundo Soba Ntumba',      'email'=>'raimundo.ntumba@aluno.ipmayombe.ao', 'turma'=>'IG-12A','senha'=>'Aluno@2024'],
-    ['num'=>'2022020005','nome'=>'Sandra Teresa Muanda',      'email'=>'sandra.muanda@aluno.ipmayombe.ao',   'turma'=>'IG-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022020001','nome'=>'Olga Perpétua Vieira',      'email'=>'olga.vieira@aluno.ipMaiombe.ao',     'turma'=>'IG-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022020002','nome'=>'Paulo Quissanga Luvualo',   'email'=>'paulo.luvualo@aluno.ipMaiombe.ao',   'turma'=>'IG-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022020003','nome'=>'Quitéria Rosa Mendonça',    'email'=>'quiteria.mendonca@aluno.ipMaiombe.ao','turma'=>'IG-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022020004','nome'=>'Raimundo Soba Ntumba',      'email'=>'raimundo.ntumba@aluno.ipMaiombe.ao', 'turma'=>'IG-12A','senha'=>'Aluno@2024'],
+    ['num'=>'2022020005','nome'=>'Sandra Teresa Muanda',      'email'=>'sandra.muanda@aluno.ipMaiombe.ao',   'turma'=>'IG-12A','senha'=>'Aluno@2024'],
 ];
 
 $aluno_ids = [];
@@ -223,37 +223,37 @@ function get_prof(PDO $pdo, string $email): ?int {
 
 $atribuicoes = [
     // Maria dos Santos — Informática (TLP, TIC)
-    ['prof'=>'maria.santos@ipmayombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'maria.santos@ipmayombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
-    ['prof'=>'maria.santos@ipmayombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
-    ['prof'=>'maria.santos@ipmayombe.ao',   'disc_sigla'=>'TIC',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'maria.santos@ipMaiombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'maria.santos@ipMaiombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
+    ['prof'=>'maria.santos@ipMaiombe.ao',   'disc_sigla'=>'TLP',  'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
+    ['prof'=>'maria.santos@ipMaiombe.ao',   'disc_sigla'=>'TIC',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
     // Carlos Mendes — Informática (SEAC, ELET)
-    ['prof'=>'carlos.mendes@ipmayombe.ao',  'disc_sigla'=>'SEAC', 'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'carlos.mendes@ipmayombe.ao',  'disc_sigla'=>'SEAC', 'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
-    ['prof'=>'carlos.mendes@ipmayombe.ao',  'disc_sigla'=>'ELET', 'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'carlos.mendes@ipmayombe.ao',  'disc_sigla'=>'TREI', 'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
+    ['prof'=>'carlos.mendes@ipMaiombe.ao',  'disc_sigla'=>'SEAC', 'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'carlos.mendes@ipMaiombe.ao',  'disc_sigla'=>'SEAC', 'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
+    ['prof'=>'carlos.mendes@ipMaiombe.ao',  'disc_sigla'=>'ELET', 'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'carlos.mendes@ipMaiombe.ao',  'disc_sigla'=>'TREI', 'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
     // Manuel Gomes — Matemática (IG)
-    ['prof'=>'manuel.gomes@ipmayombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'manuel.gomes@ipmayombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
-    ['prof'=>'manuel.gomes@ipmayombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
+    ['prof'=>'manuel.gomes@ipMaiombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'manuel.gomes@ipMaiombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
+    ['prof'=>'manuel.gomes@ipMaiombe.ao',   'disc_sigla'=>'MAT',  'disc_curso'=>2,'disc_ano'=>12,'turma'=>'IG-12A'],
     // Ana Costa — Matemática (Contabilidade)
-    ['prof'=>'ana.costa@ipmayombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
-    ['prof'=>'ana.costa@ipmayombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>11,'turma'=>'CONT-11A'],
-    ['prof'=>'ana.costa@ipmayombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>12,'turma'=>'CONT-12A'],
+    ['prof'=>'ana.costa@ipMaiombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
+    ['prof'=>'ana.costa@ipMaiombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>11,'turma'=>'CONT-11A'],
+    ['prof'=>'ana.costa@ipMaiombe.ao',      'disc_sigla'=>'MAT',  'disc_curso'=>1,'disc_ano'=>12,'turma'=>'CONT-12A'],
     // Pedro Alves — Física, FIS
-    ['prof'=>'pedro.alves@ipmayombe.ao',    'disc_sigla'=>'FIS',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'pedro.alves@ipmayombe.ao',    'disc_sigla'=>'FIS',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
+    ['prof'=>'pedro.alves@ipMaiombe.ao',    'disc_sigla'=>'FIS',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'pedro.alves@ipMaiombe.ao',    'disc_sigla'=>'FIS',  'disc_curso'=>2,'disc_ano'=>11,'turma'=>'IG-11A'],
     // Teresa Almeida — Língua Portuguesa
-    ['prof'=>'teresa.almeida@ipmayombe.ao', 'disc_sigla'=>'LP',   'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'teresa.almeida@ipmayombe.ao', 'disc_sigla'=>'LP',   'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
+    ['prof'=>'teresa.almeida@ipMaiombe.ao', 'disc_sigla'=>'LP',   'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'teresa.almeida@ipMaiombe.ao', 'disc_sigla'=>'LP',   'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
     // David Sousa — Inglês
-    ['prof'=>'david.sousa@ipmayombe.ao',    'disc_sigla'=>'ING',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
-    ['prof'=>'david.sousa@ipmayombe.ao',    'disc_sigla'=>'ING',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
+    ['prof'=>'david.sousa@ipMaiombe.ao',    'disc_sigla'=>'ING',  'disc_curso'=>2,'disc_ano'=>10,'turma'=>'IG-10A'],
+    ['prof'=>'david.sousa@ipMaiombe.ao',    'disc_sigla'=>'ING',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
     // António Silva — Contabilidade Financeira, OGE
-    ['prof'=>'antonio.silva@ipmayombe.ao',  'disc_sigla'=>'CF',   'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
-    ['prof'=>'antonio.silva@ipmayombe.ao',  'disc_sigla'=>'CF',   'disc_curso'=>1,'disc_ano'=>11,'turma'=>'CONT-11A'],
-    ['prof'=>'antonio.silva@ipmayombe.ao',  'disc_sigla'=>'OGE',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
-    ['prof'=>'antonio.silva@ipmayombe.ao',  'disc_sigla'=>'CA',   'disc_curso'=>1,'disc_ano'=>12,'turma'=>'CONT-12A'],
+    ['prof'=>'antonio.silva@ipMaiombe.ao',  'disc_sigla'=>'CF',   'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
+    ['prof'=>'antonio.silva@ipMaiombe.ao',  'disc_sigla'=>'CF',   'disc_curso'=>1,'disc_ano'=>11,'turma'=>'CONT-11A'],
+    ['prof'=>'antonio.silva@ipMaiombe.ao',  'disc_sigla'=>'OGE',  'disc_curso'=>1,'disc_ano'=>10,'turma'=>'CONT-10A'],
+    ['prof'=>'antonio.silva@ipMaiombe.ao',  'disc_sigla'=>'CA',   'disc_curso'=>1,'disc_ano'=>12,'turma'=>'CONT-12A'],
 ];
 
 foreach ($atribuicoes as $a) {
@@ -290,7 +290,7 @@ function get_aluno_id(PDO $pdo, string $numero): ?int {
 
 // Notas aprovadas para a turma CONT-10A, disciplina CF (Contabilidade Financeira)
 // Professor: António Silva
-$prof_silva = get_prof($pdo, 'antonio.silva@ipmayombe.ao');
+$prof_silva = get_prof($pdo, 'antonio.silva@ipMaiombe.ao');
 $disc_cf    = get_disc($pdo, 'CF', 1, 10);
 
 $notas_exemplo = [
@@ -318,7 +318,7 @@ if ($prof_silva && $disc_cf && $trimestre1_id) {
 
 // Notas pendentes para a turma IG-10A, disciplina TLP (2º Trimestre)
 // Para o admin poder validar
-$prof_maria  = get_prof($pdo, 'maria.santos@ipmayombe.ao');
+$prof_maria  = get_prof($pdo, 'maria.santos@ipMaiombe.ao');
 $disc_tlp    = get_disc($pdo, 'TLP', 2, 10);
 $trimestre2_id = $pdo->query("SELECT id FROM trimestres WHERE nome = '2º Trimestre' AND ano_lectivo_id = 3")->fetchColumn();
 

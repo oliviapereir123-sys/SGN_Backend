@@ -22,9 +22,8 @@ export function Header() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-card/95 backdrop-blur-md shadow-lg border-b border-border" : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-card/95 backdrop-blur-md shadow-lg border-b border-border" : "bg-transparent"
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
@@ -34,7 +33,7 @@ export function Header() {
             </div>
             <div className="hidden sm:block">
               <h1 className="font-bold text-foreground text-sm md:text-base">Instituto Politécnico</h1>
-              <p className="text-xs text-muted-foreground">do Mayombe</p>
+              <p className="text-xs text-muted-foreground">Maiombe Nº 3050 IB-SEQUELE</p>
             </div>
           </Link>
 

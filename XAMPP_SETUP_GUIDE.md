@@ -90,17 +90,17 @@ The system is configured for two academic programs:
 For testing the system:
 
 ### Student Account
-- Email: joao.silva@aluno.ipmayombe.ao
+- Email: joao.silva@aluno.ipMaiombe.ao
 - Password: aluno123
 - Course: Informática de Gestão (Year 3)
 
 ### Teacher Account
-- Email: maria.santos@ipmayombe.ao
+- Email: maria.santos@ipMaiombe.ao
 - Password: prof123
 - Department: Ciências e Tecnologia
 
 ### Admin Account
-- Email: admin@ipmayombe.ao
+- Email: admin@ipMaiombe.ao
 - Password: admin123
 
 ## API Endpoints

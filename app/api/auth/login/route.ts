@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // For now, validate against demo accounts
     const demoAccounts = {
       aluno: {
-        email: "joao.silva@aluno.ipmayombe.ao",
+        email: "joao.silva@aluno.ipMaiombe.ao",
         password: "aluno123",
         id: "ALU001",
         nome: "João Manuel da Silva",
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         ano: 3,
       },
       professor: {
-        email: "maria.santos@ipmayombe.ao",
+        email: "maria.santos@ipMaiombe.ao",
         password: "prof123",
         id: "PROF001",
         nome: "Profª. Maria dos Santos",
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         departamento: "Ciências e Tecnologia",
       },
       admin: {
-        email: "admin@ipmayombe.ao",
+        email: "admin@ipMaiombe.ao",
         password: "admin123",
         id: "ADM001",
         nome: "António Ferreira",

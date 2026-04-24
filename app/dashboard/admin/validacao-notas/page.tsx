@@ -243,8 +243,8 @@ export default function ValidacaoNotasPage() {
         </div>
         {getStatusBadge(nota.estado)}
       </div>
-      <div className="grid grid-cols-4 gap-2 mb-3">
-        {([["P1", nota.p1], ["P2", nota.p2], ["Trab.", nota.trabalho], ["Exame", nota.exame]] as [string, number | null][]).map(([l, v]) => (
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {([["MAC", nota.trabalho], ["PP", nota.p1], ["PT", nota.exame]] as [string, number | null][]).map(([l, v]) => (
           <div key={l} className="text-center p-2 rounded-lg bg-muted/50">
             <p className="text-xs text-muted-foreground">{l}</p>
             <p className="font-bold text-sm">{v !== null ? v : "—"}</p>
@@ -416,10 +416,9 @@ export default function ValidacaoNotasPage() {
                                     <thead>
                                       <tr className="border-b bg-muted/30">
                                         <th className="text-left py-2 px-3 font-semibold">Aluno</th>
-                                        <th className="text-center py-2 px-2 font-semibold">P1</th>
-                                        <th className="text-center py-2 px-2 font-semibold">P2</th>
-                                        <th className="text-center py-2 px-2 font-semibold">Trab.</th>
-                                        <th className="text-center py-2 px-2 font-semibold">Exame</th>
+                                        <th className="text-center py-2 px-2 font-semibold">MAC</th>
+                                        <th className="text-center py-2 px-2 font-semibold">PP</th>
+                                        <th className="text-center py-2 px-2 font-semibold">PT</th>
                                         <th className="text-center py-2 px-2 font-semibold">Média</th>
                                       </tr>
                                     </thead>
@@ -427,9 +426,8 @@ export default function ValidacaoNotasPage() {
                                       {grupo.notas.map(n => (
                                         <tr key={n.id} className="border-b hover:bg-muted/20">
                                           <td className="py-2 px-3 font-medium">{n.aluno_nome}</td>
-                                          <td className="py-2 px-2 text-center">{n.p1 ?? "—"}</td>
-                                          <td className="py-2 px-2 text-center">{n.p2 ?? "—"}</td>
                                           <td className="py-2 px-2 text-center">{n.trabalho ?? "—"}</td>
+                                          <td className="py-2 px-2 text-center">{n.p1 ?? "—"}</td>
                                           <td className="py-2 px-2 text-center">{n.exame ?? "—"}</td>
                                           <td className="py-2 px-2 text-center">
                                             <span className={`font-bold ${n.media !== null && Number(n.media) >= 10 ? "text-success" : "text-destructive"}`}>
@@ -679,7 +677,7 @@ export default function ValidacaoNotasPage() {
             </DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder="Ex: A nota da P2 parece incorrecta. Por favor verifique."
+            placeholder="Ex: A nota da MAC parece incorrecta. Por favor verifique."
             value={observacoes}
             onChange={e => setObservacoes(e.target.value)}
             rows={4}

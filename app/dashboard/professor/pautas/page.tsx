@@ -219,10 +219,9 @@ export default function ProfessorPautasPage() {
                         <tr className="border-b border-border">
                           <th className="text-left text-xs font-medium text-muted-foreground uppercase px-6 py-3 w-12">Nº</th>
                           <th className="text-left text-xs font-medium text-muted-foreground uppercase px-6 py-3">Estudante</th>
-                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">P1 (20%)</th>
-                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">P2 (20%)</th>
-                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">Trab. (20%)</th>
-                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">Exame (40%)</th>
+                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">MAC (AVALIAÇÃO 30%)</th>
+                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">PP (PROFESSOR 30%)</th>
+                          <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">PT (TRIMESTRE 40%)</th>
                           <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">Média</th>
                           <th className="text-center text-xs font-medium text-muted-foreground uppercase px-4 py-3">Situação</th>
                           <th className="w-8" />
@@ -246,9 +245,8 @@ export default function ProfessorPautasPage() {
                                   <span className="text-sm font-medium">{aluno.nome}</span>
                                 </div>
                               </td>
-                              <td className="px-4 py-3.5 text-center text-sm">{aluno.p1 ?? "—"}</td>
-                              <td className="px-4 py-3.5 text-center text-sm">{aluno.p2 ?? "—"}</td>
                               <td className="px-4 py-3.5 text-center text-sm">{aluno.trabalho ?? "—"}</td>
+                              <td className="px-4 py-3.5 text-center text-sm">{aluno.p1 ?? "—"}</td>
                               <td className="px-4 py-3.5 text-center text-sm">{aluno.exame ?? "—"}</td>
                               <td className="px-4 py-3.5 text-center">
                                 <span className={`text-sm font-bold ${media !== null ? (media >= 10 ? "text-green-600" : "text-red-500") : "text-muted-foreground"}`}>

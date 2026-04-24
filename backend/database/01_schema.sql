@@ -1,6 +1,6 @@
 -- ============================================================
 -- SGN — Sistema de Gestão de Notas
--- Instituto Politécnico do Mayombe
+-- Instituto Politécnico do Maiombe
 -- Ficheiro 1/2: Schema + Dados Estáticos
 -- ============================================================
 

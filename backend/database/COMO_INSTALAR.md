@@ -1,4 +1,4 @@
-# Como Instalar o SGN — Instituto Politécnico do Mayombe
+# Como Instalar o SGN — Instituto Politécnico do Maiombe
 
 ## Requisitos
 - XAMPP (ou WAMP/LAMP) com PHP 8.0+ e MySQL 8.0+
@@ -70,9 +70,9 @@ Abrir: `http://localhost:3000`
 
 | Perfil | Email / Nº | Senha |
 |--------|-----------|-------|
-| **Admin** | `admin@ipmayombe.ao` | `Admin@IPM2024` |
-| **Professor** | `maria.santos@ipmayombe.ao` | `Prof@Santos24` |
-| **Professor** | `antonio.silva@ipmayombe.ao` | `Prof@Silva24` |
+| **Admin** | `admin@ipMaiombe.ao` | `Admin@IPM2024` |
+| **Professor** | `maria.santos@ipMaiombe.ao` | `Prof@Santos24` |
+| **Professor** | `antonio.silva@ipMaiombe.ao` | `Prof@Silva24` |
 | **Aluno** | `2024010001` (nº) | `Aluno@2024` |
 | **Aluno** | `2024020001` (nº) | `Aluno@2024` |
 | **Encarregado** | `manuel.silva.enc@email.ao` | `Enc@2024` |

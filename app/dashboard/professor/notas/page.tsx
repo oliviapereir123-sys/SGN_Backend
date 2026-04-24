@@ -32,7 +32,6 @@ import {
   FileText,
   Calculator,
   Loader2,
-  MessageSquare,
 } from "lucide-react"
 import {
   Dialog,
@@ -44,6 +43,20 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
+// ─── Fórmula de média: PP×30% + AV (Trabalho)×30% + PT×40% → escala 0-20 ─────
+function calcularMedia(aluno: AlunoTurma): number | null {
+  if (aluno.p1 === null || aluno.trabalho === null || aluno.exame === null) return null
+  return aluno.p1 * 0.30 + aluno.trabalho * 0.30 + aluno.exame * 0.40
+}
+
+// ─── Situação conforme regras do IPM ─────────────────────────────────────────
+function getMediaColor(media: number | null): string {
+  if (media === null) return "text-muted-foreground"
+  if (media >= 10) return "text-green-600"
+  if (media >= 7)  return "text-yellow-600"
+  return "text-red-500"
+}
 
 export default function ProfessorNotasPage() {
   const router = useRouter()
@@ -71,7 +84,6 @@ export default function ProfessorNotasPage() {
     }
   }, [isAuthenticated, user, router])
 
-  // Carregar turmas e trimestres ao montar
   useEffect(() => {
     if (!user?.id) return
     setLoading(true)
@@ -80,7 +92,6 @@ export default function ProfessorNotasPage() {
         setTurmas(turmasRes.data || [])
         const activos = (trRes.data || []).filter((t) => t.estado !== "Pendente")
         setTrimestres(activos)
-        // pré-seleccionar trimestre activo
         const activo = activos.find((t) => t.estado === "Activo")
         if (activo) setSelectedTrId(String(activo.id))
       })
@@ -88,7 +99,6 @@ export default function ProfessorNotasPage() {
       .finally(() => setLoading(false))
   }, [user?.id])
 
-  // Quando turma ou trimestre mudam, carregar alunos
   const loadAlunos = useCallback(async () => {
     if (!selectedTurmaKey || !selectedTrId) return
     const [turmaId, disciplinaId] = selectedTurmaKey.split("|").map(Number)
@@ -119,10 +129,14 @@ export default function ProfessorNotasPage() {
     setSaved(false)
   }
 
-  const calcularMedia = (aluno: AlunoTurma) => {
-    if (aluno.p1 === null || aluno.p2 === null || aluno.trabalho === null || aluno.exame === null) return null
-    return aluno.p1 * 0.2 + aluno.p2 * 0.2 + aluno.trabalho * 0.2 + aluno.exame * 0.4
-  }
+  // Notas completas = tem os 3 campos preenchidos e não está Aprovado
+  const notasCompletas = alunos.filter(
+    (a) => a.p1 !== null && a.trabalho !== null && a.exame !== null && a.estado !== "Aprovado"
+  ).length
+  const notasIncompletas = alunos.filter((a) => a.estado !== "Aprovado").length - notasCompletas
+  const mediaGeral =
+    alunos.filter((a) => calcularMedia(a) !== null).reduce((s, a) => s + calcularMedia(a)!, 0) /
+      (alunos.filter((a) => calcularMedia(a) !== null).length || 1) || null
 
   const buildPayload = () => {
     const [turmaId, disciplinaId] = selectedTurmaKey.split("|").map(Number)
@@ -133,11 +147,12 @@ export default function ProfessorNotasPage() {
         disciplinaId,
         professorId: user!.id,
         trimestreId: Number(selectedTrId),
+        // p1 = Prova Professor, trabalho = Avaliação, exame = Prova Trimestre
         p1: a.p1,
-        p2: a.p2,
         trabalho: a.trabalho,
         exame: a.exame,
         feedback: (a as any).feedback ?? null,
+        NotaPayload: null,
       }))
   }
 
@@ -145,7 +160,7 @@ export default function ProfessorNotasPage() {
     if (!selectedTurmaKey || !selectedTrId) return
     setSaving(true)
     try {
-      await submitNotas(buildPayload())
+      await submitNotas(buildPayload(), "rascunho")
       setSaved(true)
       setHasChanges(false)
       toast({ title: "Rascunho guardado!", description: "As notas foram guardadas como rascunho." })
@@ -163,7 +178,7 @@ export default function ProfessorNotasPage() {
     if (!selectedTurmaKey || !selectedTrId) return
     setSaving(true)
     try {
-      await submitNotas(buildPayload())
+      await submitNotas(buildPayload(), "submeter")
       setIsSubmitDialogOpen(false)
       setHasChanges(false)
       toast({
@@ -179,42 +194,21 @@ export default function ProfessorNotasPage() {
     }
   }
 
-  const getEstadoBadge = (estado: string) => {
+  const getEstadoBadge = (estado: string, emRecurso?: boolean) => {
+    if (emRecurso) {
+      return <Badge className="bg-blue-100 text-blue-700 border-0"><RotateCcw className="w-3 h-3 mr-1" />Em recurso</Badge>
+    }
     switch (estado) {
       case "Aprovado":
-        return (
-          <Badge className="bg-success/20 text-success border-0">
-            <CheckCircle2 className="w-3 h-3 mr-1" />Validado
-          </Badge>
-        )
+        return <Badge className="bg-green-100 text-green-700 border-0"><CheckCircle2 className="w-3 h-3 mr-1" />Validado</Badge>
       case "Pendente":
-        return (
-          <Badge className="bg-warning/20 text-warning border-0">
-            <Clock className="w-3 h-3 mr-1" />Pendente
-          </Badge>
-        )
+        return <Badge className="bg-yellow-100 text-yellow-700 border-0"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>
       case "Rejeitado":
-        return (
-          <Badge className="bg-destructive/20 text-destructive border-0">
-            <XCircle className="w-3 h-3 mr-1" />Rejeitado
-          </Badge>
-        )
+        return <Badge className="bg-red-100 text-red-700 border-0"><XCircle className="w-3 h-3 mr-1" />Rejeitado</Badge>
       default:
-        return (
-          <Badge className="bg-muted text-muted-foreground border-0">
-            <FileText className="w-3 h-3 mr-1" />Rascunho
-          </Badge>
-        )
+        return <Badge className="bg-muted text-muted-foreground border-0"><FileText className="w-3 h-3 mr-1" />Rascunho</Badge>
     }
   }
-
-  const notasCompletas = alunos.filter(
-    (a) => a.p1 !== null && a.p2 !== null && a.trabalho !== null && a.estado !== "Aprovado"
-  ).length
-  const notasIncompletas = alunos.filter((a) => a.estado !== "Aprovado").length - notasCompletas
-  const mediaGeral =
-    alunos.filter((a) => calcularMedia(a) !== null).reduce((s, a) => s + calcularMedia(a)!, 0) /
-      (alunos.filter((a) => calcularMedia(a) !== null).length || 1) || null
 
   return (
     <div className="min-h-screen bg-background">
@@ -244,7 +238,7 @@ export default function ProfessorNotasPage() {
                     disabled={!hasChanges || saving}
                     className="gap-2 bg-transparent"
                   >
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4 text-success" /> : <Save className="w-4 h-4" />}
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Save className="w-4 h-4" />}
                     {saved ? "Guardado!" : "Guardar Rascunho"}
                   </Button>
                   <Button onClick={() => setIsSubmitDialogOpen(true)} disabled={notasCompletas === 0 || saving} className="gap-2">
@@ -308,8 +302,8 @@ export default function ProfessorNotasPage() {
                   </Card>
                   <Card>
                     <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                        <CheckCircle2 className="w-5 h-5 text-success" />
+                      <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{notasCompletas}</p>
@@ -319,8 +313,8 @@ export default function ProfessorNotasPage() {
                   </Card>
                   <Card>
                     <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-                        <AlertCircle className="w-5 h-5 text-warning" />
+                      <div className="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{notasIncompletas}</p>
@@ -342,14 +336,13 @@ export default function ProfessorNotasPage() {
                 </div>
               )}
 
-              {/* Loading alunos */}
               {selectedTurmaKey && loadingAlunos && (
                 <div className="flex items-center justify-center h-48">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               )}
 
-              {/* Pauta */}
+              {/* Pauta — 3 colunas corrigidas */}
               {selectedTurmaKey && !loadingAlunos && alunos.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -357,8 +350,9 @@ export default function ProfessorNotasPage() {
                       <FileText className="w-5 h-5 text-primary" />
                       Pauta — {selectedTurma?.turma_nome} / {selectedTurma?.disciplina_nome}
                     </CardTitle>
+                    {/* Descrição com fórmula actual */}
                     <CardDescription>
-                      Peso: P1 (20%) + P2 (20%) + Trabalho (20%) + Exame (40%)
+                      Fórmula: MAC 30% + PP 30% + PT 40% — Escala 0–20
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -369,16 +363,22 @@ export default function ProfessorNotasPage() {
                             <th className="text-left py-4 px-4 font-semibold text-sm">Nº</th>
                             <th className="text-left py-4 px-4 font-semibold text-sm">Aluno</th>
                             <th className="text-center py-4 px-2 font-semibold text-sm">
-                              <TooltipProvider><Tooltip><TooltipTrigger>P1 (20%)</TooltipTrigger><TooltipContent>Primeira Prova</TooltipContent></Tooltip></TooltipProvider>
+                              <TooltipProvider><Tooltip>
+                                <TooltipTrigger className="cursor-default">MAC<br/><span className="text-xs font-normal text-muted-foreground">(30%)</span></TooltipTrigger>
+                                <TooltipContent>MAC  — peso 30%</TooltipContent>
+                              </Tooltip></TooltipProvider>
                             </th>
                             <th className="text-center py-4 px-2 font-semibold text-sm">
-                              <TooltipProvider><Tooltip><TooltipTrigger>P2 (20%)</TooltipTrigger><TooltipContent>Segunda Prova</TooltipContent></Tooltip></TooltipProvider>
+                              <TooltipProvider><Tooltip>
+                                <TooltipTrigger className="cursor-default">PP<br/><span className="text-xs font-normal text-muted-foreground">(30%)</span></TooltipTrigger>
+                                <TooltipContent>PP  — peso 30%</TooltipContent>
+                              </Tooltip></TooltipProvider>
                             </th>
                             <th className="text-center py-4 px-2 font-semibold text-sm">
-                              <TooltipProvider><Tooltip><TooltipTrigger>Trab (20%)</TooltipTrigger><TooltipContent>Trabalho</TooltipContent></Tooltip></TooltipProvider>
-                            </th>
-                            <th className="text-center py-4 px-2 font-semibold text-sm">
-                              <TooltipProvider><Tooltip><TooltipTrigger>Exame (40%)</TooltipTrigger><TooltipContent>Exame Final</TooltipContent></Tooltip></TooltipProvider>
+                              <TooltipProvider><Tooltip>
+                                <TooltipTrigger className="cursor-default">PT<br/><span className="text-xs font-normal text-muted-foreground">(40%)</span></TooltipTrigger>
+                                <TooltipContent>PT — peso 40%</TooltipContent>
+                              </Tooltip></TooltipProvider>
                             </th>
                             <th className="text-center py-4 px-4 font-semibold text-sm">Média</th>
                             <th className="text-center py-4 px-4 font-semibold text-sm">Estado</th>
@@ -389,7 +389,7 @@ export default function ProfessorNotasPage() {
                           <AnimatePresence>
                             {alunos.map((aluno, index) => {
                               const media = calcularMedia(aluno)
-                              const isEditable = aluno.estado !== "Aprovado"
+                              const isEditable = aluno.estado !== "Aprovado" || aluno.em_recurso
                               return (
                                 <motion.tr
                                   key={aluno.id}
@@ -411,7 +411,8 @@ export default function ProfessorNotasPage() {
                                       <span className="font-medium">{aluno.nome}</span>
                                     </div>
                                   </td>
-                                  {(["p1", "p2", "trabalho", "exame"] as const).map((campo) => (
+                                  {/* p1 = Prova Professor | trabalho = Avaliação (MAC) | exame = Prova Trimestral (PT) */}
+                                  {(["trabalho", "p1", "exame"] as const).map((campo) => (
                                     <td key={campo} className="py-2 px-2">
                                       <Input
                                         type="number"
@@ -426,11 +427,11 @@ export default function ProfessorNotasPage() {
                                     </td>
                                   ))}
                                   <td className="py-3 px-4 text-center">
-                                    <span className={`text-lg font-bold ${media !== null ? (media >= 10 ? "text-success" : "text-destructive") : "text-muted-foreground"}`}>
+                                    <span className={`text-lg font-bold ${getMediaColor(media)}`}>
                                       {media !== null ? media.toFixed(1) : "—"}
                                     </span>
                                   </td>
-                                  <td className="py-3 px-4 text-center">{getEstadoBadge(aluno.estado || "Rascunho")}</td>
+                                  <td className="py-3 px-4 text-center">{getEstadoBadge(aluno.estado || "Rascunho", aluno.em_recurso)}</td>
                                   <td className="py-2 px-2">
                                     <Textarea
                                       rows={1}
@@ -476,7 +477,6 @@ export default function ProfessorNotasPage() {
         </main>
       </div>
 
-      {/* Submit Dialog */}
       <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -491,10 +491,10 @@ export default function ProfessorNotasPage() {
           <div className="py-4 space-y-3">
             <div className="flex justify-between p-3 rounded-lg bg-muted/50">
               <span>Notas completas a submeter:</span>
-              <span className="font-bold text-success">{notasCompletas}</span>
+              <span className="font-bold text-green-600">{notasCompletas}</span>
             </div>
             {notasIncompletas > 0 && (
-              <div className="flex justify-between p-3 rounded-lg bg-warning/10 text-warning">
+              <div className="flex justify-between p-3 rounded-lg bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10">
                 <span>Notas incompletas (não submetidas):</span>
                 <span className="font-bold">{notasIncompletas}</span>
               </div>

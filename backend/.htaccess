@@ -1,5 +1,16 @@
+# SGN — Backend .htaccess
+# Coloca este ficheiro em: C:\xampp\htdocs\SGN\backend\.htaccess
+
+# ── Passar o header Authorization ao PHP (XAMPP/Windows bloqueia por defeito) ──
 RewriteEngine On
+
+# Método 1: via variável de ambiente (forma mais compatível)
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
+# Método 2: via SetEnvIf (fallback)
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+# Método 3: REDIRECT_ prefix (Apache mod_rewrite no Windows)
+RewriteCond %{HTTP:Authorization} .+
+RewriteRule ^ - [E=REDIRECT_HTTP_AUTHORIZATION:%{HTTP:Authorization}]

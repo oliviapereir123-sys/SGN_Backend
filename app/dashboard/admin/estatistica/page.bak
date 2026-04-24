@@ -7,34 +7,39 @@ import { useAuth } from "@/lib/auth-context"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { DashboardHeader } from "@/components/dashboard/header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getRelatorioNotas } from "@/lib/api"
-import { TrendingUp, CheckCircle2, Clock, XCircle, BookOpen, Loader2, AlertCircle } from "lucide-react"
+import { getAdminStats } from "@/lib/api"
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, LineChart, Line
+  TrendingUp, Users, BookOpen, ClipboardList, GraduationCap,
+  Loader2, AlertCircle, CheckCircle2, Clock, XCircle, BarChart2,
+} from "lucide-react"
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts"
 
-interface Relatorio {
-  totais: { total_notas: number; pendentes: number; aprovadas: number; rejeitadas: number; media_geral: number }
-  por_disciplina: { disciplina: string; total: number; media: number; aprovados: number; pct_aprovados: number }[]
-  por_trimestre: { trimestre: string; total: number; media: number; aprovados: number }[]
+interface StatsData {
+  success: boolean
+  totais: { alunos: number; turmas: number; disciplinas: number; professores: number }
+  notas: { total: number; pendentes: number; aprovadas: number; rejeitadas: number; media_geral: number }
+  taxa_aprovacao: number
+  pct_lancamento: number
+  trimestre_activo: string | null
+  evolucao: { trimestre: string; media: number; total_notas: number; aprovados: number }[]
+  auditoria: { acao: string; detalhes: string; criado_em: string; utilizador: string }[]
 }
 
 export default function AdminEstatisticasPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
-  const [data, setData] = useState<Relatorio | null>(null)
+  const [data, setData] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated || user?.type !== "admin") {
-      router.push("/")
-    }
+    if (!isAuthenticated || user?.type !== "admin") router.push("/")
   }, [isAuthenticated, user, router])
 
   useEffect(() => {
-    getRelatorioNotas()
-      .then((res) => setData(res as Relatorio))
+    getAdminStats()
+      .then((res: any) => { if (res?.success) setData(res as StatsData) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -64,23 +69,23 @@ export default function AdminEstatisticasPage() {
                 <CardContent className="text-center">
                   <AlertCircle className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
                   <h3 className="text-lg font-medium mb-2">Sem dados disponíveis</h3>
-                  <p className="text-muted-foreground">Ainda não há notas aprovadas no sistema.</p>
+                  <p className="text-muted-foreground">Não foi possível carregar as estatísticas.</p>
                 </CardContent>
               </Card>
             ) : (
               <>
-                {/* Totais */}
+                {/* Totais gerais */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { icon: BookOpen,    label: "Total Notas",  value: data.totais.total_notas, color: "primary" },
-                    { icon: Clock,       label: "Pendentes",    value: data.totais.pendentes,   color: "warning" },
-                    { icon: CheckCircle2,label: "Aprovadas",    value: data.totais.aprovadas,   color: "success" },
-                    { icon: XCircle,     label: "Rejeitadas",   value: data.totais.rejeitadas,  color: "destructive" },
-                  ].map(({ icon: Icon, label, value, color }) => (
+                    { icon: GraduationCap, label: "Alunos Activos",  value: data.totais.alunos,      colorText: "text-blue-600",   colorBg: "bg-blue-50" },
+                    { icon: ClipboardList, label: "Turmas Activas",  value: data.totais.turmas,       colorText: "text-purple-600", colorBg: "bg-purple-50" },
+                    { icon: BookOpen,      label: "Disciplinas",      value: data.totais.disciplinas,  colorText: "text-green-600",  colorBg: "bg-green-50" },
+                    { icon: Users,         label: "Professores",      value: data.totais.professores,  colorText: "text-orange-600", colorBg: "bg-orange-50" },
+                  ].map(({ icon: Icon, label, value, colorText, colorBg }) => (
                     <Card key={label}>
                       <CardContent className="p-4 flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl bg-${color}/10 flex items-center justify-center`}>
-                          <Icon className={`w-5 h-5 text-${color}`} />
+                        <div className={`w-10 h-10 rounded-xl ${colorBg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-5 h-5 ${colorText}`} />
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">{label}</p>
@@ -91,50 +96,76 @@ export default function AdminEstatisticasPage() {
                   ))}
                 </div>
 
-                {/* Média geral destaque */}
-                {data.totais.media_geral && (
-                  <Card className="bg-primary/5 border-primary/20">
+                {/* Notas */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { icon: BarChart2,    label: "Total Notas", value: data.notas.total,     colorText: "text-primary",     colorBg: "bg-primary/10" },
+                    { icon: Clock,        label: "Pendentes",   value: data.notas.pendentes,  colorText: "text-yellow-600",  colorBg: "bg-yellow-50" },
+                    { icon: CheckCircle2, label: "Aprovadas",   value: data.notas.aprovadas,  colorText: "text-green-600",   colorBg: "bg-green-50" },
+                    { icon: XCircle,      label: "Rejeitadas",  value: data.notas.rejeitadas, colorText: "text-red-600",     colorBg: "bg-red-50" },
+                  ].map(({ icon: Icon, label, value, colorText, colorBg }) => (
+                    <Card key={label}>
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl ${colorBg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-5 h-5 ${colorText}`} />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">{label}</p>
+                          <p className="text-2xl font-bold">{value}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Destaques */}
+                <div className="grid md:grid-cols-3 gap-4">
+                  {data.notas.media_geral > 0 && (
+                    <Card className="bg-primary/5 border-primary/20">
+                      <CardContent className="p-6 flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
+                          <TrendingUp className="w-7 h-7 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Média Geral</p>
+                          <p className="text-4xl font-bold text-primary">{data.notas.media_geral}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  <Card className="bg-green-50 border-green-200">
                     <CardContent className="p-6 flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                        <TrendingUp className="w-8 h-8 text-primary" />
+                      <div className="w-14 h-14 rounded-2xl bg-green-200 flex items-center justify-center">
+                        <CheckCircle2 className="w-7 h-7 text-green-700" />
                       </div>
                       <div>
-                        <p className="text-muted-foreground">Média Geral do Sistema</p>
-                        <p className="text-4xl font-bold text-primary">{data.totais.media_geral}</p>
+                        <p className="text-sm text-muted-foreground">Taxa de Aprovação</p>
+                        <p className="text-4xl font-bold text-green-700">{data.taxa_aprovacao}%</p>
                       </div>
                     </CardContent>
                   </Card>
-                )}
-
-                {/* Gráfico por disciplina */}
-                {data.por_disciplina.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Média por Disciplina</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.por_disciplina} margin={{ top: 5, right: 20, left: 0, bottom: 60 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="disciplina" angle={-30} textAnchor="end" tick={{ fontSize: 12 }} />
-                          <YAxis domain={[0, 20]} />
-                          <Tooltip />
-                          <Bar dataKey="media" name="Média" fill="hsl(var(--primary))" radius={4} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  <Card className="bg-blue-50 border-blue-200">
+                    <CardContent className="p-6 flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-blue-200 flex items-center justify-center">
+                        <ClipboardList className="w-7 h-7 text-blue-700" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          Lançamento{data.trimestre_activo ? ` (${data.trimestre_activo})` : ""}
+                        </p>
+                        <p className="text-4xl font-bold text-blue-700">{data.pct_lancamento}%</p>
+                      </div>
                     </CardContent>
                   </Card>
-                )}
+                </div>
 
                 {/* Evolução por trimestre */}
-                {data.por_trimestre.length > 1 && (
+                {data.evolucao && data.evolucao.length > 0 && (
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Evolução por Trimestre</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Evolução por Trimestre</CardTitle></CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={data.por_trimestre}>
+                        <LineChart data={data.evolucao}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="trimestre" />
                           <YAxis domain={[0, 20]} />
@@ -146,36 +177,25 @@ export default function AdminEstatisticasPage() {
                   </Card>
                 )}
 
-                {/* Tabela por disciplina */}
-                {data.por_disciplina.length > 0 && (
+                {/* Auditoria recente */}
+                {data.auditoria && data.auditoria.length > 0 && (
                   <Card>
-                    <CardHeader>
-                      <CardTitle>Detalhes por Disciplina</CardTitle>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Actividade Recente</CardTitle></CardHeader>
                     <CardContent>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b bg-muted/30">
-                              <th className="text-left py-3 px-4 font-semibold">Disciplina</th>
-                              <th className="text-center py-3 px-4 font-semibold">Total</th>
-                              <th className="text-center py-3 px-4 font-semibold">Média</th>
-                              <th className="text-center py-3 px-4 font-semibold">Aprovados</th>
-                              <th className="text-center py-3 px-4 font-semibold">% Aprovação</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {data.por_disciplina.map((d) => (
-                              <tr key={d.disciplina} className="border-b hover:bg-muted/20">
-                                <td className="py-3 px-4 font-medium">{d.disciplina}</td>
-                                <td className="py-3 px-4 text-center">{d.total}</td>
-                                <td className="py-3 px-4 text-center font-bold text-primary">{d.media}</td>
-                                <td className="py-3 px-4 text-center text-success">{d.aprovados}</td>
-                                <td className="py-3 px-4 text-center">{d.pct_aprovados}%</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      <div className="space-y-3">
+                        {data.auditoria.map((a, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 border">
+                            <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium">{a.acao}</p>
+                              {a.detalhes && <p className="text-xs text-muted-foreground truncate">{a.detalhes}</p>}
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-xs text-muted-foreground">{a.utilizador}</p>
+                              <p className="text-xs text-muted-foreground">{new Date(a.criado_em).toLocaleDateString("pt-AO")}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

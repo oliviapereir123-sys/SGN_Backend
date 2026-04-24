@@ -81,7 +81,7 @@ export default function ProfessorLoginPage() {
               </div>
               <div>
                 <h2 className="text-xl font-bold">Instituto Politécnico</h2>
-                <p className="text-white/70">do Mayombe</p>
+                <p className="text-white/70">Maiombe IB Sequele Nº 3050</p>
               </div>
             </div>
 
@@ -113,7 +113,7 @@ export default function ProfessorLoginPage() {
 
             <div className="mt-8 p-4 bg-white/10 rounded-xl border border-white/20">
               <p className="text-sm font-semibold mb-2">Conta Demo:</p>
-              <p className="text-sm text-white/80">Email: maria.santos@ipmayombe.ao</p>
+              <p className="text-sm text-white/80">Email: maria.santos@ipMaiombe.ao</p>
               <p className="text-sm text-white/80">Senha: prof123</p>
             </div>
           </motion.div>
@@ -164,7 +164,7 @@ export default function ProfessorLoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="professor@ipmayombe.ao"
+                    placeholder="professor@ipMaiombe.ao"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -219,7 +219,7 @@ export default function ProfessorLoginPage() {
 
             <div className="lg:hidden mt-6 p-4 bg-secondary/5 rounded-xl border border-secondary/20">
               <p className="text-sm font-semibold mb-2 text-secondary">Conta Demo:</p>
-              <p className="text-sm text-muted-foreground">Email: maria.santos@ipmayombe.ao</p>
+              <p className="text-sm text-muted-foreground">Email: maria.santos@ipMaiombe.ao</p>
               <p className="text-sm text-muted-foreground">Senha: prof123</p>
             </div>
 

@@ -45,6 +45,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/backend/api
 ```
 
 ### 5. Credenciais Padrão
-- Admin: admin@ipmayombe.ao / admin123
-- Professor: maria.santos@ipmayombe.ao / prof123
-- Aluno: joao.silva@aluno.ipmayombe.ao / aluno123
+- Admin: admin@ipMaiombe.ao / admin123
+- Professor: maria.santos@ipMaiombe.ao / prof123
+- Aluno: joao.silva@aluno.ipMaiombe.ao / aluno123

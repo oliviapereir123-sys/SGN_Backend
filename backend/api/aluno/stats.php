@@ -1,17 +1,29 @@
 <?php
+/**
+ * GET /aluno/stats.php?alunoId=X
+ * Estatísticas do aluno para o painel principal.
+ *
+ * Fórmula de média (30% / 30% / 40%) e critérios de aprovação:
+ *   MAC / Avaliação (trabalho) × 30%
+ *   Prova do Professor (p1)    × 30%
+ *   Prova do Trimestre (exame) × 40%
+ *
+ * Critérios IPM:
+ *   0  – 6.9  → Reprovado
+ *   7  – 9.9  → Recurso
+ *   10 – 20   → Aprovado
+ */
 require_once __DIR__ . '/../../config/Headers.php';
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../config/Auth.php';
 
-Auth::requireRole(['aluno', 'encarregado']);
+$auth = Auth::requireRole('aluno', 'encarregado');
 $db   = new Database();
 $conn = $db->connect();
-$user = Auth::getUser();
 
-// Encarregado passa alunoId, aluno usa o próprio id
-$alunoId = intval($_GET['alunoId'] ?? $user['id']);
+$alunoId = intval($_GET['alunoId'] ?? $auth['id']);
 
-// Notas aprovadas por disciplina com médias
+// Notas aprovadas por disciplina
 $notasR = $conn->prepare("
     SELECT n.id, d.nome AS disciplina_nome, tr.nome AS trimestre_nome,
            n.media, n.estado, n.nota_recuperacao,
@@ -40,13 +52,16 @@ $taxaFreq = ($freq['total'] > 0)
     ? round(100 * $freq['presencas'] / $freq['total'], 1)
     : null;
 
-// Calcular médias
+// Calcular médias usando fórmula corrigida
 $comMedia  = array_filter($notas, fn($n) => $n['media'] !== null);
 $mediaGeral = count($comMedia) > 0
     ? round(array_sum(array_column($comMedia, 'media')) / count($comMedia), 1)
     : null;
-$aprovadas  = count(array_filter($comMedia, fn($n) => $n['media'] >= 10));
-$reprovadas = count($comMedia) - $aprovadas;
+
+// Critérios corrigidos
+$aprovadas  = count(array_filter($comMedia, fn($n) => floatval($n['media']) >= 10));
+$recurso    = count(array_filter($comMedia, fn($n) => floatval($n['media']) >= 7 && floatval($n['media']) < 10));
+$reprovadas = count($comMedia) - $aprovadas - $recurso;
 
 // Evolução por trimestre
 $evolucaoR = $conn->prepare("
@@ -60,12 +75,14 @@ $evolucaoR = $conn->prepare("
 $evolucaoR->bind_param("i", $alunoId);
 $evolucaoR->execute();
 $evolucao = $evolucaoR->get_result()->fetch_all(MYSQLI_ASSOC);
+foreach ($evolucao as &$e) $e['media'] = floatval($e['media']);
 
 echo json_encode([
     'success'     => true,
     'notas'       => $notas,
     'media_geral' => $mediaGeral,
     'aprovadas'   => $aprovadas,
+    'recurso'     => $recurso,
     'reprovadas'  => $reprovadas,
     'taxa_freq'   => $taxaFreq,
     'evolucao'    => $evolucao,

@@ -7,7 +7,6 @@
 class Auth {
 
     private static function getSecret(): string {
-        // Tentar ler do .env (uma linha acima da pasta api/)
         $envPaths = [
             __DIR__ . '/../.env',
             __DIR__ . '/../../.env',
@@ -18,19 +17,16 @@ class Auth {
                 foreach ($lines as $line) {
                     if (str_starts_with(trim($line), 'JWT_SECRET=')) {
                         $val = trim(substr($line, strlen('JWT_SECRET=')));
-                        // Remover aspas se existirem
                         $val = trim($val, '"\'');
                         if ($val !== '') return $val;
                     }
                 }
             }
         }
-        // Fallback: variável de ambiente do servidor (XAMPP → httpd-env ou php.ini)
         $envVar = getenv('JWT_SECRET');
         if ($envVar) return $envVar;
 
-        // Último recurso: valor padrão (ALTERAR EM PRODUÇÃO)
-        return 'SGN_IPM_MAYOMBE_SECRET_CHANGE_ME_IN_PRODUCTION';
+        return 'SGN_IPM_Maiombe_SECRET_CHANGE_ME_IN_PRODUCTION';
     }
 
     private static int $ttl = 86400 * 7; // 7 dias
@@ -68,27 +64,45 @@ class Auth {
     }
 
     // ─── Extrair token do header Authorization ───────────────
-    // Tenta múltiplas fontes porque o XAMPP/Apache no Windows
-    // às vezes não passa o header Authorization ao PHP
+    // Solução robusta para XAMPP/Windows que bloqueia o header Authorization
 
     public static function getTokenFromRequest(): ?string {
+        $auth = '';
+
         // 1. Forma padrão
-        $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-
-        // 2. Fallback — Apache mod_rewrite via .htaccess
-        if (empty($auth)) {
-            $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+            $auth = $_SERVER['HTTP_AUTHORIZATION'];
         }
-
-        // 3. Fallback — getallheaders()
-        if (empty($auth) && function_exists('getallheaders')) {
-            $headers = getallheaders();
-            foreach ($headers as $name => $value) {
+        // 2. Apache mod_rewrite via .htaccess (REDIRECT_ prefix)
+        elseif (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
+        // 3. Variável de ambiente injectada pelo .htaccess
+        elseif (!empty(getenv('HTTP_AUTHORIZATION'))) {
+            $auth = getenv('HTTP_AUTHORIZATION');
+        }
+        // 4. getallheaders() — lê directamente os headers HTTP
+        elseif (function_exists('getallheaders')) {
+            foreach (getallheaders() as $name => $value) {
                 if (strtolower($name) === 'authorization') {
                     $auth = $value;
                     break;
                 }
             }
+        }
+        // 5. apache_request_headers() — alias de getallheaders()
+        elseif (function_exists('apache_request_headers')) {
+            foreach (apache_request_headers() as $name => $value) {
+                if (strtolower($name) === 'authorization') {
+                    $auth = $value;
+                    break;
+                }
+            }
+        }
+
+        // 6. Fallback via query string ?_token=... (XAMPP último recurso)
+        if (empty($auth) && !empty($_GET['_token'])) {
+            $auth = 'Bearer ' . $_GET['_token'];
         }
 
         if (preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) {

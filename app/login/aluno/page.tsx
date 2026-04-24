@@ -9,7 +9,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { GraduationCap, Eye, EyeOff, Loader2, ArrowLeft, User, Lock, BookOpen, AlertCircle } from "lucide-react"
+import { GraduationCap, Eye, EyeOff, Loader2, ArrowLeft, User, Lock, BookOpen, AlertCircle, Mail, Hash } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 export default function AlunoLoginPage() {
@@ -17,21 +17,28 @@ export default function AlunoLoginPage() {
   const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [numeroAluno, setNumeroAluno] = useState("")
+  const [identificador, setIdentificador] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+
+  // Detecta automaticamente se é número ou email
+  const isEmail = identificador.includes("@")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    const success = await login("aluno", { numeroAluno, password })
+    const credentials = isEmail
+      ? { email: identificador, password }
+      : { numeroAluno: identificador, password }
+
+    const success = await login("aluno", credentials)
 
     if (success) {
       router.push("/dashboard/aluno")
     } else {
-      setError("Número de aluno ou senha incorrectos")
+      setError("Número de aluno, email ou senha incorrectos")
     }
     setIsLoading(false)
   }
@@ -40,27 +47,19 @@ export default function AlunoLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex">
       {/* Left Side - Decorative */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-secondary relative overflow-hidden">
-        {/* Animated Background Shapes */}
         <div className="absolute inset-0">
           <motion.div
-            animate={{
-              x: [0, 30, 0],
-              y: [0, -30, 0],
-            }}
+            animate={{ x: [0, 30, 0], y: [0, -30, 0] }}
             transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
             className="absolute top-20 left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"
           />
           <motion.div
-            animate={{
-              x: [0, -20, 0],
-              y: [0, 20, 0],
-            }}
+            animate={{ x: [0, -20, 0], y: [0, 20, 0] }}
             transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY }}
             className="absolute bottom-20 right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"
           />
         </div>
 
-        {/* Content */}
         <div className="relative z-10 flex flex-col justify-center p-12 text-white">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex items-center gap-3 mb-8">
@@ -69,7 +68,7 @@ export default function AlunoLoginPage() {
               </div>
               <div>
                 <h2 className="text-xl font-bold">Instituto Politécnico</h2>
-                <p className="text-white/70">do Mayombe</p>
+                <p className="text-white/70">do Maiombe</p>
               </div>
             </div>
 
@@ -101,7 +100,8 @@ export default function AlunoLoginPage() {
 
             <div className="mt-8 p-4 bg-white/10 rounded-xl border border-white/20">
               <p className="text-sm font-semibold mb-2">Conta Demo:</p>
-              <p className="text-sm text-white/80">Número: 2024001234</p>
+              <p className="text-sm text-white/80">Número: 2024010001</p>
+              <p className="text-sm text-white/80">ou Email: joao.silva@aluno.ipMaiombe.ao</p>
               <p className="text-sm text-white/80">Senha: aluno123</p>
             </div>
           </motion.div>
@@ -146,19 +146,32 @@ export default function AlunoLoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="numero-aluno">Número de Aluno</Label>
+                <Label htmlFor="identificador">
+                  Número de Aluno ou Email
+                </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  {/* Ícone muda dinamicamente conforme o utilizador escreve */}
+                  {isEmail
+                    ? <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary" />
+                    : <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  }
                   <Input
-                    id="numero-aluno"
+                    id="identificador"
                     type="text"
-                    placeholder="Ex: 2024001234"
-                    value={numeroAluno}
-                    onChange={(e) => setNumeroAluno(e.target.value)}
+                    placeholder="Ex: 2024010001 ou joao@email.com"
+                    value={identificador}
+                    onChange={(e) => setIdentificador(e.target.value)}
                     required
                     className="h-12 pl-11"
+                    autoComplete="username"
                   />
                 </div>
+                {/* Indicador subtil do modo detectado */}
+                {identificador.length > 0 && (
+                  <p className="text-xs text-muted-foreground pl-1">
+                    {isEmail ? "✉ A entrar com email" : "# A entrar com número de aluno"}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -173,6 +186,7 @@ export default function AlunoLoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="h-12 pl-11 pr-12"
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
@@ -207,7 +221,8 @@ export default function AlunoLoginPage() {
 
             <div className="lg:hidden mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20">
               <p className="text-sm font-semibold mb-2 text-primary">Conta Demo:</p>
-              <p className="text-sm text-muted-foreground">Número: 2024001234</p>
+              <p className="text-sm text-muted-foreground">Número: 2024010001</p>
+              <p className="text-sm text-muted-foreground">ou Email: joao.silva@aluno.ipMaiombe.ao</p>
               <p className="text-sm text-muted-foreground">Senha: aluno123</p>
             </div>
 

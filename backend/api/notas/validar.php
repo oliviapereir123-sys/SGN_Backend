@@ -45,6 +45,21 @@ if ($stmt->affected_rows === 0) {
     exit();
 }
 
+// Se aprovado, marcar ou limpar flag de recurso conforme média
+if ($data['estado'] === 'Aprovado') {
+    $chk = $conn->prepare("SELECT media FROM notas WHERE id = ?");
+    $chk->bind_param('i', $data['notaId']);
+    $chk->execute();
+    $row = $chk->get_result()->fetch_assoc();
+    if ($row && $row['media'] !== null) {
+        $media = floatval($row['media']);
+        $emRecurso = ($media >= 7 && $media < 10) ? 1 : 0;
+        $updFlag = $conn->prepare("UPDATE notas SET em_recurso = ? WHERE id = ?");
+        $updFlag->bind_param('ii', $emRecurso, $data['notaId']);
+        $updFlag->execute();
+    }
+}
+
 echo json_encode(['success' => true, 'message' => "Nota {$data['estado']} com sucesso"]);
 $db->closeConnection();
 ?>

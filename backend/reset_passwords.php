@@ -39,7 +39,7 @@ $log = [];
 // ─── Actualizar admin ────────────────────────────────────────
 $hash = password_hash($PASS_ADMIN, PASSWORD_BCRYPT, ['cost' => 12]);
 $conn->query("UPDATE admin SET password='$hash'");
-$log[] = ['Admin', 'admin@ipmayombe.ao', $PASS_ADMIN, $conn->affected_rows];
+$log[] = ['Admin', 'admin@ipMaiombe.ao', $PASS_ADMIN, $conn->affected_rows];
 
 // ─── Actualizar professores ──────────────────────────────────
 $hashProf = password_hash($PASS_PROF, PASSWORD_BCRYPT, ['cost' => 12]);
@@ -94,27 +94,27 @@ $conn->close();
   <tr><th>Perfil</th><th>Email</th><th>Password</th></tr>
   <tr>
     <td><strong>Admin</strong></td>
-    <td><code>admin@ipmayombe.ao</code></td>
+    <td><code>admin@ipMaiombe.ao</code></td>
     <td><code><?= $PASS_ADMIN ?></code></td>
   </tr>
   <tr>
     <td><strong>Professor</strong></td>
-    <td><code>maria.santos@ipmayombe.ao</code></td>
+    <td><code>maria.santos@ipMaiombe.ao</code></td>
     <td><code><?= $PASS_PROF ?></code></td>
   </tr>
   <tr>
     <td><strong>Professor</strong></td>
-    <td><code>antonio.silva@ipmayombe.ao</code></td>
+    <td><code>antonio.silva@ipMaiombe.ao</code></td>
     <td><code><?= $PASS_PROF ?></code></td>
   </tr>
   <tr>
     <td><strong>Aluno</strong></td>
-    <td><code>joao.silva@aluno.ipmayombe.ao</code></td>
+    <td><code>joao.silva@aluno.ipMaiombe.ao</code></td>
     <td><code><?= $PASS_ALUNO ?></code></td>
   </tr>
   <tr>
     <td><strong>Aluno</strong></td>
-    <td><code>esperanca.dias@aluno.ipmayombe.ao</code></td>
+    <td><code>esperanca.dias@aluno.ipMaiombe.ao</code></td>
     <td><code><?= $PASS_ALUNO ?></code></td>
   </tr>
   <tr>

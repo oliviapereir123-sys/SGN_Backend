@@ -248,7 +248,7 @@ export function generateBoletimPDF(
 
   return `
     <div class="header">
-      <h1>Instituto Politécnico do Mayombe</h1>
+      <h1>Inst. Politécnico do Maiombe IB Sequele Nº 3050</h1>
       <p>Boletim de Notas - ${trimestre} - ${anoLectivo}</p>
     </div>
 
@@ -276,10 +276,9 @@ export function generateBoletimPDF(
         <tr>
           <th>Disciplina</th>
           <th>Professor</th>
-          <th class="text-center">P1 (20%)</th>
-          <th class="text-center">P2 (20%)</th>
-          <th class="text-center">Trab. (20%)</th>
-          <th class="text-center">Exame (40%)</th>
+          <th class="text-center">MAC (30%)</th>
+          <th class="text-center">PP (30%)</th>
+          <th class="text-center">PT (40%)</th>
           <th class="text-center">Média Final</th>
           <th class="text-center">Estado</th>
         </tr>
@@ -291,9 +290,8 @@ export function generateBoletimPDF(
           <tr>
             <td>${disc.nome}</td>
             <td>${disc.professor}</td>
-            <td class="text-center">${disc.notas.p1}</td>
-            <td class="text-center">${disc.notas.p2}</td>
             <td class="text-center">${disc.notas.trabalho}</td>
+            <td class="text-center">${disc.notas.p1}</td>
             <td class="text-center">${disc.notas.exame ?? "-"}</td>
             <td class="text-center font-bold ${disc.media !== null ? (disc.media >= 10 ? "text-success" : "text-danger") : ""}">${disc.media?.toFixed(1) ?? "-"}</td>
             <td class="text-center">
@@ -346,7 +344,7 @@ export function generateRelatorioPDF(
 ): string {
   return `
     <div class="header">
-      <h1>Instituto Politécnico do Mayombe</h1>
+      <h1>Inst. Politécnico do Maiombe IB Sequele Nº 3050</h1>
       <p>${titulo}</p>
       ${subtitulo ? `<p style="margin-top: 5px;">${subtitulo}</p>` : ""}
     </div>

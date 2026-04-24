@@ -25,7 +25,7 @@ const PARTICLES = [
   { left: 73.2, top: 78.5, duration: 4.4, delay: 0.4 },
   { left: 28.9, top: 91.0, duration: 3.2, delay: 1.5 },
   { left: 61.3, top: 14.7, duration: 4.8, delay: 0.6 },
-  { left: 5.8,  top: 47.3, duration: 3.6, delay: 1.9 },
+  { left: 5.8, top: 47.3, duration: 3.6, delay: 1.9 },
   { left: 93.4, top: 38.1, duration: 4.2, delay: 0.1 },
   { left: 38.7, top: 65.4, duration: 3.9, delay: 1.3 },
   { left: 52.1, top: 83.6, duration: 4.6, delay: 0.9 },
@@ -33,7 +33,7 @@ const PARTICLES = [
   { left: 79.8, top: 55.9, duration: 4.0, delay: 0.3 },
   { left: 35.2, top: 29.7, duration: 3.8, delay: 1.0 },
   { left: 66.7, top: 72.4, duration: 4.3, delay: 0.7 },
-  { left: 8.3,  top: 88.1, duration: 3.5, delay: 1.4 },
+  { left: 8.3, top: 88.1, duration: 3.5, delay: 1.4 },
   { left: 48.9, top: 43.6, duration: 4.7, delay: 0.5 },
   { left: 82.4, top: 19.8, duration: 3.1, delay: 1.8 },
   { left: 24.6, top: 57.3, duration: 4.5, delay: 0.2 },
@@ -100,10 +100,10 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 text-balance"
+            className="text-4xl md:text-6xl lg:text-6xl font-bold text-foreground mb-6 text-balance"
           >
             Instituto Politécnico{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">do Mayombe</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Maiombe Nº 3050 IB-SEQUELE</span>
           </motion.h1>
 
           {/* Subtitle */}
